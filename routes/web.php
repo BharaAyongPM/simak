@@ -29,6 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/form', [DashboardController::class, 'form'])->name('form');
     Route::get('/kalender', [DashboardController::class, 'kalender'])->name('kalender');
+    Route::get('/tukarshift', [DashboardController::class, 'tukarshift'])->name('tukarshift');
     Route::get('/profile', [ProfileController::class, 'create'])->name('user-profile');
 
     // Route untuk memperbarui profile (update method)

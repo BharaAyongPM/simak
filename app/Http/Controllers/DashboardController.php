@@ -18,4 +18,8 @@ class DashboardController extends Controller
     {
         return view('dashboard.kalender');
     }
+    public function tukarshift()
+    {
+        return view('dashboard.tukarshift');
+    }
 }
