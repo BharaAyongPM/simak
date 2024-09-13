@@ -124,6 +124,7 @@
                                     <p id="lokasi">Mendeteksi lokasi...</p>
                                     <input type="hidden" id="latitude">
                                     <input type="hidden" id="longitude">
+                                    <p id="namaLokasi">Nama Lokasi: </p>
                                 </div>
                             </div>
                         </div>
@@ -174,6 +175,20 @@
                         document.getElementById('lokasi').innerText = `Latitude: ${latitude}, Longitude: ${longitude}`;
                         document.getElementById('latitude').value = latitude;
                         document.getElementById('longitude').value = longitude;
+
+                        // Call Nominatim API to get the location name
+                        fetch(
+                                `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                let locationName = data.display_name || 'Lokasi tidak ditemukan';
+                                document.getElementById('namaLokasi').innerText = `Nama Lokasi: ${locationName}`;
+                            })
+                            .catch(err => {
+                                console.log("Error fetching location name: ", err);
+                                document.getElementById('namaLokasi').innerText = 'Nama lokasi tidak ditemukan';
+                            });
+
                     });
                 } else {
                     document.getElementById('lokasi').innerText = 'Geolocation tidak didukung oleh browser ini.';

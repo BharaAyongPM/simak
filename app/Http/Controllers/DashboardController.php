@@ -10,4 +10,12 @@ class DashboardController extends Controller
     {
         return view('dashboard.index');
     }
+    public function form()
+    {
+        return view('dashboard.form');
+    }
+    public function kalender()
+    {
+        return view('dashboard.kalender');
+    }
 }
