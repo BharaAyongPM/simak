@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\CutiController;
+use App\Http\Controllers\CutilemburController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\IzinController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SessionsController;
@@ -44,6 +47,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi');
     Route::post('/absensi/masuk', [AbsensiController::class, 'absenMasuk'])->name('absensi.masuk');
     Route::post('/absensi/pulang/{id}', [AbsensiController::class, 'absenPulang'])->name('absensi.pulang');
+    //Cutilembur
+    // Route::get('/form-izin', [CutilemburController::class, 'index'])->name('cutilembur.index');
+    // Route::post('/form-izin', [CutilemburController::class, 'store'])->name('cutilembur.store');
+    // Route::get('/form-izin/{id}/edit', [CutilemburController::class, 'edit'])->name('cutilembur.edit');
+    // Route::put('/form-izin/{id}', [CutilemburController::class, 'update'])->name('cutilembur.update');
+    // Route::delete('/form-izin/{id}', [CutilemburController::class, 'destroy'])->name('cutilembur.destroy');
+    //IZIN
+    Route::get('/izin', [IzinController::class, 'index'])->name('izin.index');
+    Route::post('/izin/store', [IzinController::class, 'store'])->name('izin.store');
+    Route::get('/izin/edit/{id}', [IzinController::class, 'edit'])->name('izin.edit');
+    Route::put('/izin/update/{id}', [IzinController::class, 'update'])->name('izin.update');
+    Route::delete('/izin/delete/{id}', [IzinController::class, 'destroy'])->name('izin.destroy');
+    //CUTI
+    Route::resource('cuti', CutiController::class)->except(['create', 'show']);
     //PROFIL
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
 

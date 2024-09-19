@@ -70,9 +70,16 @@
                     <ul class="nav ms-4">
                         <li class="nav-item">
                             <a class="nav-link text-white {{ $activePage == 'form-izin' ? ' active bg-gradient-primary' : '' }}"
-                                href="{{ route('form') }}">
+                                href="{{ route('izin.index') }}">
                                 <i class="material-icons opacity-10">receipt_long</i>
-                                <span class="nav-link-text">Form I/C/S/L</span>
+                                <span class="nav-link-text">Form Izin</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white {{ $activePage == 'form-cuti' ? ' active bg-gradient-primary' : '' }}"
+                                href="{{ route('cuti.index') }}">
+                                <i class="material-icons opacity-10">receipt_long</i>
+                                <span class="nav-link-text">Form Cuti</span>
                             </a>
                         </li>
                         <li class="nav-item">

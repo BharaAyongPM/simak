@@ -26,8 +26,7 @@ class AbsensiController extends Controller
 
         // Fetch the latest attendance record for display
         $latestAbsensi = Absensi::where('karyawan', Auth::id())
-            ->whereMonth('tanggal', now()->month)
-            ->latest()
+            ->whereDate('tanggal', $today)  // Ensure it's only for today
             ->first();
 
         // Fetch all attendance records for the current month
