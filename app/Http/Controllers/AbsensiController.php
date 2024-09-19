@@ -7,7 +7,7 @@ use App\Models\Absensi;
 use App\Models\Karyawan;
 use App\Models\Lokasi;
 use App\Models\Setting;
-
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
@@ -16,119 +16,143 @@ class AbsensiController extends Controller
 {
     public function index()
     {
-        $hari = hari(date('Y/m/d'));
-        $iduser = Auth::id();  // Auth::id() is more concise
-        $lokasi = Lokasi::all();
-        $dkar = Karyawan::where('id_karyawan', $iduser)->first();
-        $karyawan = Karyawan::where('id_karyawan', $iduser)->get();
-        return view('absensi.index', compact('karyawan', 'hari', 'lokasi', 'dkar'));
-    }
+        $today = now()->format('Y-m-d');
 
-    public function listData()
-    {
-        $iduser = Auth::id();
-        $trcogs = Absensi::where('tanggal', date("Y-m-d"))
-            ->orderBy('tanggal', 'desc')
-            ->orderBy('jam', 'asc')
+        // Fetch today's shift information for the logged-in user
+        $lokasi = Lokasi::with(['karyn', 'bag', 'unt'])
+            ->where('karyawan', Auth::id())
+            ->whereDate('tanggal', $today)
+            ->first();
+
+        // Fetch the latest attendance record for display
+        $latestAbsensi = Absensi::where('karyawan', Auth::id())
+            ->whereMonth('tanggal', now()->month)
+            ->latest()
+            ->first();
+
+        // Fetch all attendance records for the current month
+        $absensi = Absensi::where('karyawan', Auth::id())
+            ->whereMonth('tanggal', now()->month)
             ->get();
 
-        $data = [];
-        foreach ($trcogs as $list) {
-            $karyawan = Karyawan::where('id_karyawan', $list->karyawan)->first();
-            $lokasi = Lokasi::where('shift', $list->shift)
-                ->where('tanggal', $list->tanggal)
-                ->first();
+        // Fetch setting data to get office latitude and longitude
+        $setting = Setting::first();  // Assuming there's only one setting record
 
-            $row = [];
-            $row[] = tgl_indo($list->tanggal);
-            $row[] = $list->shift;
-            $row[] = $karyawan->nama;
-            $row[] = $list->jam;
-            $row[] = ($list->jenis == 'masuk') ? $list->lokasi : '';
-            $row[] = $list->jam_pulang;
-            $row[] = ($list->jenis == 'pulang') ? $list->lokasi : '';
-            $row[] = $list->ip_address;
-            $row[] = ($list->dt == "1") ? '<small class="label label-danger"><i class="fa fa-check"></i> Ya </small>' : '';
-            $row[] = ($list->jenis == 'off') ? '<small class="label label-danger"><i class="fa fa-clock-o"></i> OFF </small>' : $list->keterangan . " - " . $list->catatan;
+        // Pass lokasi, latestAbsensi, absensi, and setting data to the view
+        return view('absensi.index', compact('lokasi', 'latestAbsensi', 'absensi', 'setting'));
+    }
+    // Fungsi untuk mencatat absensi masuk
+    public function absenMasuk(Request $request)
+    {
+        $validatedData = $request->validate([
+            'lat' => 'required',
+            'lng' => 'required',
+            'foto' => 'required',
+            'lokasi' => 'required',
+        ]);
 
-            $data[] = $row;
+        // Get today's date and the current time
+        $today = now()->toDateString();
+        $currentTime = now();
+
+        // Get shift information for the current user and today's date
+        $lokasi = Lokasi::where('karyawan', Auth::id())
+            ->whereDate('tanggal', $today)
+            ->first();
+
+        // If no shift information is found for today, return an error
+        if (!$lokasi) {
+            return response()->json(['message' => 'Shift tidak ditemukan untuk hari ini.'], 400);
         }
 
-        return response()->json(["data" => $data]);
-    }
+        // Get company location (latitude and longitude) from the settings table
+        $setting = Setting::first();  // Assuming there's only one settings entry
 
-    public function listDataKaryawan()
-    {
-        $iduser = Auth::id();
-        $trcogs = Absensi::where('karyawan', $iduser)
-            ->groupBy('tanggal')
-            ->orderBy('tanggal', 'desc')
-            ->get();
-
-        $data = [];
-        foreach ($trcogs as $list) {
-            $row = [];
-            $row[] = tgl_indo($list->tanggal);
-            $row[] = $list->shift;
-
-            $cekmasuk = Absensi::where('karyawan', $iduser)
-                ->where('jenis', 'masuk')
-                ->where('tanggal', $list->tanggal)
-                ->first();
-
-            $row[] = $cekmasuk ? $cekmasuk->jam : '';
-
-            $cekpulang = Absensi::where('karyawan', $iduser)
-                ->where('jenis', 'pulang')
-                ->where('tanggal', $list->tanggal)
-                ->first();
-
-            $row[] = $cekpulang ? $cekpulang->jam_pulang : 'Belum Cek Out';
-
-            $data[] = $row;
+        if (!$setting) {
+            return response()->json(['message' => 'Lokasi kantor tidak ditemukan.'], 400);
         }
 
-        return response()->json(["data" => $data]);
-    }
+        $kantorLat = $setting->lat;
+        $kantorLng = $setting->lon;
 
-    public function store(Request $request)
-    {
-        $iduser = Auth::id();
-        $karyawan = Karyawan::where('id_karyawan', $iduser)->first();
-        $setting = Setting::find(1);
+        // Calculate the distance between user location and office location (in meters)
+        $distance = $this->haversineGreatCircleDistance($request->lat, $request->lng, $kantorLat, $kantorLng);
 
-        // Handling various absen types (wfh, pulang, etc.)
-        if ($request['absen'] == 'wfh') {
-            // Code for WFH check-in
-        } elseif ($request['absen'] == 'pulang') {
-            // Code for check-out
-        } elseif ($request['absen'] == 'pulang_wfh') {
-            // Code for WFH check-out
+        // If the distance is greater than 100 meters, return an error
+        if ($distance > 100) {
+            return response()->json(['message' => 'Anda berada di luar jangkauan untuk absen. Jarak ke kantor terlalu jauh.'], 400);
+        }
+
+        // Create a new Absensi entry
+        $absensi = new Absensi();
+        $absensi->tanggal = $today;  // Set today's date
+        $absensi->lat = $request->lat;
+        $absensi->lng = $request->lng;
+        $absensi->karyawan = Auth::id();
+        $absensi->jenis = 'Masuk';
+        $absensi->jam = $currentTime;  // Set current time
+        $absensi->lokasi = $request->lokasi;
+        $absensi->shift = $lokasi->shift;  // Get shift from Lokasi table
+        $absensi->ip_address = $request->ip();  // Get user's IP address
+
+        // Determine if the user is late (dt = 1 if late, 0 otherwise)
+        $jamMasukShift = Carbon::parse($lokasi->jam_masuk);  // Parse shift's jam_masuk time
+        if ($currentTime->greaterThan($jamMasukShift)) {
+            $absensi->dt = 1;  // Mark as late
+            $absensi->keterangan = 'Datang Terlambat';
+            $absensi->waktu_dt = $currentTime->diffInMinutes($jamMasukShift);  // Store the number of minutes late
         } else {
-            // Code for normal check-in
+            $absensi->dt = 0;  // On time
+            $absensi->keterangan = 'Tepat Waktu';
+            $absensi->waktu_dt = 0;
         }
 
-        return response()->json(['msg' => 'success']);
+        // Upload foto absen masuk
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $filename = 'foto_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/absensi'), $filename);
+            $absensi->fhoto = $filename;
+        }
+
+        $absensi->save();
+
+        return response()->json([
+            'message' => 'Absen Masuk berhasil disimpan!',
+            'jamMasuk' => $absensi->jam->format('H:i:s'),
+        ]);
+    }
+    private function haversineGreatCircleDistance($lat1, $lon1, $lat2, $lon2, $earthRadius = 6371000)
+    {
+        $latFrom = deg2rad($lat1);
+        $lonFrom = deg2rad($lon1);
+        $latTo = deg2rad($lat2);
+        $lonTo = deg2rad($lon2);
+
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = $lonTo - $lonFrom;
+
+        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+
+        return $angle * $earthRadius; // Jarak dalam meter
     }
 
-    public function edit($id)
+    // Fungsi untuk mencatat absensi pulang
+    public function absenPulang(Request $request, $id)
     {
-        $absensi = Absensi::findOrFail($id);
-        return response()->json($absensi);
-    }
+        $absensi = Absensi::where('karyawan', Auth::id())
+            ->where('jenis', 'Masuk')
+            ->whereNull('jam_pulang')
+            ->firstOrFail();
 
-    public function destroy($id)
-    {
-        $absensi = Absensi::findOrFail($id);
-        $absensi->delete();
-        return response()->json(['msg' => 'success']);
-    }
+        $absensi->jam_pulang = now();
+        $absensi->tgl_pulang = now();
+        $absensi->save();
 
-    public function printCard(Request $request)
-    {
-        $detail_pembelian = Bon::whereIn('id', $request->id)->get();
-        $pdf = PDF::loadView('bon.card', compact('detail_pembelian'));
-        $pdf->setPaper('a5', 'landscape');
-        return $pdf->stream();
+        return response()->json([
+            'message' => 'Absen Pulang berhasil disimpan!',
+            'jamPulang' => $absensi->jam_pulang->format('H:i:s'),
+        ]);
     }
 }

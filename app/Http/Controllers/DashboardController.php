@@ -22,4 +22,32 @@ class DashboardController extends Controller
     {
         return view('dashboard.tukarshift');
     }
+    public function tukardepo()
+    {
+        return view('dashboard.tukar_deposit');
+    }
+    public function dinasluar()
+    {
+        return view('dashboard.dinasluar');
+    }
+    public function datangterlambat()
+    {
+        return view('dashboard.datangterlambat');
+    }
+    public function dokumen()
+    {
+        return view('dashboard.dokumen');
+    }
+    public function pelatihan()
+    {
+        return view('dashboard.pelatihan');
+    }
+    public function historydepo()
+    {
+        return view('dashboard.historydepo');
+    }
+    public function rekappelatihan()
+    {
+        return view('dashboard.rekap-pelatihan');
+    }
 }

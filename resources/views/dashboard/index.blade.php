@@ -1,5 +1,5 @@
 <x-layout bodyClass="g-sidenav-show bg-gray-200">
-    <x-navbars.sidebar activePage='log-absensi'></x-navbars.sidebar>
+    <x-navbars.sidebar activePage='dashboard'></x-navbars.sidebar>
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
         <!-- Navbar -->
         <x-navbars.navs.auth titlePage="Log Absen"></x-navbars.navs.auth>
@@ -178,7 +178,8 @@
 
                         // Call Nominatim API to get the location name
                         fetch(
-                                `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`)
+                                `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
+                                )
                             .then(response => response.json())
                             .then(data => {
                                 let locationName = data.display_name || 'Lokasi tidak ditemukan';

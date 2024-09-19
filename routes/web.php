@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');  // Alihkan ke rute login
 });
 Route::get('/login', [SessionsController::class, 'create'])->name('login');
 Route::post('/login', [SessionsController::class, 'store'])->name('sessions.store');
@@ -30,9 +31,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/form', [DashboardController::class, 'form'])->name('form');
     Route::get('/kalender', [DashboardController::class, 'kalender'])->name('kalender');
     Route::get('/tukarshift', [DashboardController::class, 'tukarshift'])->name('tukarshift');
+    Route::get('/tukardepo', [DashboardController::class, 'tukardepo'])->name('tukardepo');
+    Route::get('/dinasluar', [DashboardController::class, 'dinasluar'])->name('dinasluar');
+    Route::get('/datangterlambat', [DashboardController::class, 'datangterlambat'])->name('datangterlambat');
+    Route::get('/dokumen', [DashboardController::class, 'dokumen'])->name('dokumen');
+    Route::get('/pelatihan', [DashboardController::class, 'pelatihan'])->name('pelatihan');
+    Route::get('/historydepo', [DashboardController::class, 'historydepo'])->name('history-deposit');
+    Route::get('/rekappelatihan', [DashboardController::class, 'rekappelatihan'])->name('rekap-pelatihan');
     Route::get('/profile', [ProfileController::class, 'create'])->name('user-profile');
 
-    // Route untuk memperbarui profile (update method)
+    //ABSENSi
+    Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi');
+    Route::post('/absensi/masuk', [AbsensiController::class, 'absenMasuk'])->name('absensi.masuk');
+    Route::post('/absensi/pulang/{id}', [AbsensiController::class, 'absenPulang'])->name('absensi.pulang');
+    //PROFIL
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     // Route untuk logout (destroy method)

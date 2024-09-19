@@ -15,11 +15,11 @@
     <div class="collapse navbar-collapse  w-auto  max-height-vh-100" id="sidenav-collapse-main">
         <ul class="navbar-nav">
             <li class="nav-item mt-3">
-                <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Laravel examples
+                <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Data Profil
                 </h6>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white {{ $activePage == 'user-profile' ? 'active bg-gradient-primary' : '' }} "
+                <a class="nav-link text-white {{ $activePage == 'profile' ? 'active bg-gradient-primary' : '' }} "
                     href="{{ route('user-profile') }}">
                     <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
                         <i style="font-size: 1.2rem;" class="fas fa-user-circle ps-2 pe-2 text-center"></i>
@@ -49,16 +49,80 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white {{ $activePage == 'tables' ? ' active bg-gradient-primary' : '' }} "
-                    href="{{ route('form') }}">
+                <a class="nav-link text-white {{ $activePage == 'absensi' ? ' active bg-gradient-primary' : '' }} "
+                    href="{{ route('absensi') }}">
                     <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                        <i class="material-icons opacity-10">table_view</i>
+                        <i class="material-icons opacity-10">dashboard</i>
                     </div>
-                    <span class="nav-link-text ms-1">Form I/C/S/L</span>
+                    <span class="nav-link-text ms-1">Absensi</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white {{ $activePage == 'billing' ? ' active bg-gradient-primary' : '' }}  "
+                <a class="nav-link text-white {{ $activePage == 'form' ? ' active bg-gradient-primary' : '' }}"
+                    data-bs-toggle="collapse" href="#submenuForm" aria-expanded="false">
+                    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+
+                    </div>
+                    <span class="nav-link-text ms-1">Form</span>
+                </a>
+                <!-- Submenu -->
+                <div class="collapse" id="submenuForm">
+                    <ul class="nav ms-4">
+                        <li class="nav-item">
+                            <a class="nav-link text-white {{ $activePage == 'form-izin' ? ' active bg-gradient-primary' : '' }}"
+                                href="{{ route('form') }}">
+                                <i class="material-icons opacity-10">receipt_long</i>
+                                <span class="nav-link-text">Form I/C/S/L</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white {{ $activePage == 'tukar-shift' ? ' active bg-gradient-primary' : '' }}"
+                                href="{{ route('tukarshift') }}">
+                                <i class="material-icons opacity-10">receipt_long</i>
+                                <span class="nav-link-text">Tukar Shift</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white {{ $activePage == 'tukar-deposit' ? ' active bg-gradient-primary' : '' }}"
+                                href="{{ route('tukardepo') }}">
+                                <i class="material-icons opacity-10">receipt_long</i>
+                                <span class="nav-link-text">Tukar Deposit</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white {{ $activePage == 'dinas-luar' ? ' active bg-gradient-primary' : '' }}"
+                                href="{{ route('dinasluar') }}">
+                                <i class="material-icons opacity-10">receipt_long</i>
+                                <span class="nav-link-text">Dinas Luar</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white {{ $activePage == 'datang-terlambat' ? ' active bg-gradient-primary' : '' }}"
+                                href="{{ route('datangterlambat') }}">
+                                <i class="material-icons opacity-10">receipt_long</i>
+                                <span class="nav-link-text">Datang Terlambat</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white {{ $activePage == 'dokumen' ? ' active bg-gradient-primary' : '' }}"
+                                href="{{ route('dokumen') }}">
+                                <i class="material-icons opacity-10">receipt_long</i>
+                                <span class="nav-link-text">Upload Dokumen</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white {{ $activePage == 'pelatihan' ? ' active bg-gradient-primary' : '' }}"
+                                href="{{ route('pelatihan') }}">
+                                <i class="material-icons opacity-10">receipt_long</i>
+                                <span class="nav-link-text">Pelatihan</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link text-white {{ $activePage == 'kalender-kerja' ? ' active bg-gradient-primary' : '' }}  "
                     href="{{ route('kalender') }}">
                     <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
                         <i class="material-icons opacity-10">receipt_long</i>
@@ -66,15 +130,7 @@
                     <span class="nav-link-text ms-1">Kalender Kerja</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link text-white {{ $activePage == 'billing' ? ' active bg-gradient-primary' : '' }}  "
-                    href="{{ route('tukarshift') }}">
-                    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                        <i class="material-icons opacity-10">receipt_long</i>
-                    </div>
-                    <span class="nav-link-text ms-1">Tukar Shift</span>
-                </a>
-            </li>
+
             <li class="nav-item">
                 <a class="nav-link text-white {{ $activePage == 'virtual-reality' ? ' active bg-gradient-primary' : '' }}  "
                     href="/vr">
@@ -103,33 +159,26 @@
                 </a>
             </li>
             <li class="nav-item mt-3">
-                <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Account pages</h6>
+                <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">NOTES</h6>
             </li>
             <li class="nav-item">
                 <a class="nav-link text-white {{ $activePage == 'profile' ? ' active bg-gradient-primary' : '' }}  "
                     href="{{ route('user-profile') }}">
                     <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                        <i class="material-icons opacity-10">person</i>
+                        <i class="material-icons opacity-10">assignment</i>
                     </div>
-                    <span class="nav-link-text ms-1">Profile</span>
+                    <span class="nav-link-text ms-1">Peraturan & SK</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link text-white " href="{{ route('login') }}">
                     <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                        <i class="material-icons opacity-10">login</i>
-                    </div>
-                    <span class="nav-link-text ms-1">Sign In</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white " href="{{ route('register') }}">
-                    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
                         <i class="material-icons opacity-10">assignment</i>
                     </div>
-                    <span class="nav-link-text ms-1">Sign Up</span>
+                    <span class="nav-link-text ms-1">Pengumuman</span>
                 </a>
             </li>
+
         </ul>
     </div>
 

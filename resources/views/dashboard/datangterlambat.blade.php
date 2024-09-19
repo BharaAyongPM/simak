@@ -1,33 +1,32 @@
 <x-layout bodyClass="g-sidenav-show bg-gray-200">
-    <x-navbars.sidebar activePage='form-izin'></x-navbars.sidebar>
+    <x-navbars.sidebar activePage='datang-terlambat'></x-navbars.sidebar>
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
         <!-- Navbar -->
-        <x-navbars.navs.auth titlePage="Form Izin"></x-navbars.navs.auth>
+        <x-navbars.navs.auth titlePage="Data Permohonan Datang Terlambat Karyawan"></x-navbars.navs.auth>
         <!-- End Navbar -->
         <div class="container-fluid py-4">
             <div class="row">
                 <div class="col-xl-12 mb-4">
                     <div class="card">
                         <div class="card-header pb-0 d-flex justify-content-between align-items-center">
-                            <h6>Form Izin, Cuti, Lembur, Sakit</h6>
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#izinModal">
-                                + Tambah Izin
+                            <h6>Data Permohonan Datang Terlambat Karyawan</h6>
+                            <button class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#datangTerlambatModal">
+                                + Tambah Permohonan
                             </button>
                         </div>
                         <div class="card-body px-0 pt-0 pb-2">
                             <div class="table-responsive p-4">
-                                <!-- Tabel dengan border lebih jelas -->
-                                <table id="izinTable" class="table align-items-center table-hover table-bordered mb-0">
+                                <!-- Tabel Data Permohonan Datang Terlambat -->
+                                <table id="datangTerlambatTable"
+                                    class="table align-items-center table-hover table-bordered mb-0">
                                     <thead class="thead-light">
                                         <tr>
                                             <th>No</th>
-                                            <th>Gambar</th>
                                             <th>Tanggal</th>
-                                            <th>Jenis</th>
                                             <th>Nama</th>
-                                            <th>Bagian</th>
+                                            <th>Departemen</th>
                                             <th>Unit</th>
-                                            <th>Tanggal Izin/Cuti/Lembur/Sakit</th>
                                             <th>Keterangan</th>
                                             <th>Approve Level 1</th>
                                             <th>Approve Level 2</th>
@@ -38,20 +37,18 @@
                                         {{-- Contoh data --}}
                                         <tr>
                                             <td>1</td>
-                                            <td><img src="{{ asset('path/to/image') }}" alt="Dokumen"
-                                                    class="img-fluid rounded-circle" width="50"></td>
-                                            <td>12-Sep-2024</td>
-                                            <td>Cuti</td>
+                                            <td>13-Sep-2024</td>
                                             <td>Bhara Ayong</td>
                                             <td>IT</td>
                                             <td>Jakarta</td>
-                                            <td>12-14 Sep 2024</td>
-                                            <td>Keperluan pribadi</td>
+                                            <td>Datang terlambat karena macet</td>
                                             <td><span class="badge bg-success">Approved</span></td>
                                             <td><span class="badge bg-danger">Pending</span></td>
-                                            <td><button class="btn btn-primary btn-sm">Aksi</button></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-warning">Edit</button>
+                                                <button class="btn btn-sm btn-danger">Hapus</button>
+                                            </td>
                                         </tr>
-                                        {{-- Tambahkan loop data dari database --}}
                                     </tbody>
                                 </table>
                             </div>
@@ -60,32 +57,22 @@
                 </div>
             </div>
 
-            <!-- Modal untuk Tambah Izin -->
-            <div class="modal fade" id="izinModal" tabindex="-1" role="dialog" aria-labelledby="izinModalLabel"
-                aria-hidden="true">
+            <!-- Modal untuk Tambah Permohonan Datang Terlambat -->
+            <div class="modal fade" id="datangTerlambatModal" tabindex="-1" role="dialog"
+                aria-labelledby="datangTerlambatModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="izinModalLabel">Tambah Izin, Cuti, Lembur, Sakit</h5>
+                            <h5 class="modal-title" id="datangTerlambatModalLabel">Tambah Permohonan Datang Terlambat
+                            </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"
                                 aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form id="izinForm" enctype="multipart/form-data" class="needs-validation" novalidate>
+                            <form id="datangTerlambatForm" enctype="multipart/form-data" class="needs-validation"
+                                novalidate>
                                 <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="jenis" class="form-label">Jenis</label>
-                                        <select class="form-control border border-1" id="jenis" name="jenis"
-                                            onchange="toggleCuti()" required>
-                                            <option value="">Pilih Jenis</option>
-                                            <option value="Sakit">Sakit</option>
-                                            <option value="Izin">Izin</option>
-                                            <option value="Lembur">Lembur</option>
-                                            <option value="Cuti">Cuti</option>
-                                        </select>
-                                        <div class="invalid-feedback">Jenis wajib diisi.</div>
-                                    </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-12">
                                         <label for="nama" class="form-label">Nama Karyawan</label>
                                         <input type="text" class="form-control border border-1" id="nama"
                                             name="nama" required>
@@ -94,50 +81,25 @@
                                 </div>
 
                                 <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="tanggal_awal" class="form-label">Tanggal Awal</label>
-                                        <input type="date" class="form-control border border-1" id="tanggal_awal"
-                                            name="tanggal_awal" required>
-                                        <div class="invalid-feedback">Tanggal awal wajib diisi.</div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="tanggal_akhir" class="form-label">Tanggal Akhir</label>
-                                        <input type="date" class="form-control border border-1" id="tanggal_akhir"
-                                            name="tanggal_akhir" required>
-                                        <div class="invalid-feedback">Tanggal akhir wajib diisi.</div>
-                                    </div>
-                                </div>
-
-                                <!-- Select Sisa Cuti, hanya tampil jika jenis cuti -->
-                                <div class="row mb-3" id="sisaCutiDiv" style="display: none;">
                                     <div class="col-md-12">
-                                        <label for="sisa_cuti" class="form-label">Sisa Cuti</label>
-                                        <select class="form-control border border-1" id="sisa_cuti" name="sisa_cuti">
-                                            <option value="10">10 Hari</option>
-                                            <option value="5">5 Hari</option>
-                                            <option value="0">0 Hari</option>
-                                        </select>
+                                        <label for="tanggal" class="form-label">Tanggal</label>
+                                        <input type="date" class="form-control border border-1" id="tanggal"
+                                            name="tanggal" required>
+                                        <div class="invalid-feedback">Tanggal wajib diisi.</div>
                                     </div>
                                 </div>
 
                                 <div class="row mb-3">
                                     <div class="col-md-12">
                                         <label for="keterangan" class="form-label">Keterangan</label>
-                                        <textarea class="form-control border border-1" id="keterangan" name="keterangan" rows="3"></textarea>
-                                    </div>
-                                </div>
-
-                                <div class="row mb-3">
-                                    <div class="col-md-12">
-                                        <label for="dokumen" class="form-label">Dokumen/Gambar</label>
-                                        <input type="file" class="form-control border border-1" id="dokumen"
-                                            name="dokumen">
+                                        <textarea class="form-control border border-1" id="keterangan" name="keterangan" rows="3" required></textarea>
+                                        <div class="invalid-feedback">Keterangan wajib diisi.</div>
                                     </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-12 text-end">
-                                        <button type="submit" class="btn btn-success mt-3">Save</button>
+                                        <button type="submit" class="btn btn-success mt-3">Simpan</button>
                                     </div>
                                 </div>
                             </form>
@@ -164,7 +126,7 @@
 
         <script>
             $(document).ready(function() {
-                $('#izinTable').DataTable({
+                $('#datangTerlambatTable').DataTable({
                     "paging": true,
                     "searching": true,
                     "ordering": true,
@@ -184,16 +146,6 @@
                     }
                 });
             });
-
-            function toggleCuti() {
-                const jenis = document.getElementById('jenis').value;
-                const sisaCutiDiv = document.getElementById('sisaCutiDiv');
-                if (jenis === 'Cuti') {
-                    sisaCutiDiv.style.display = 'block';
-                } else {
-                    sisaCutiDiv.style.display = 'none';
-                }
-            }
 
             (function() {
                 'use strict'

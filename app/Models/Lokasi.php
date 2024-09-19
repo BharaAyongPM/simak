@@ -13,18 +13,18 @@ class Lokasi extends Model
     public $timestamps = true;  // Menggunakan timestamps (created_at, updated_at)
 
     // Tambahkan fungsi relasi jika ada kebutuhan terkait relasi dengan tabel karyawan, divisi, atau unit
-    public function karyawan()
+    public function karyn()
     {
-        return $this->belongsTo(Karyawan::class, 'karyawan');
+        return $this->belongsTo(User::class, 'karyawan', 'id');
     }
 
-    public function divisi()
+    public function bag()
     {
-        return $this->belongsTo(Divisi::class, 'divisi');
+        return $this->belongsTo(Bag::class, 'divisi', 'id_bagian');
     }
 
-    public function unit()
+    public function unt()
     {
-        return $this->belongsTo(Unit::class, 'unit');
+        return $this->belongsTo(Unit::class, 'unit', 'id'); // Sesuaikan dengan foreign key 'unit' di tabel users
     }
 }
