@@ -44,74 +44,84 @@ class AbsensiController extends Controller
     public function absenMasuk(Request $request)
     {
         $validatedData = $request->validate([
-            'lat' => 'required',
-            'lng' => 'required',
-            'foto' => 'required',
-            'lokasi' => 'required',
+            'lat' => 'required|numeric',
+            'lng' => 'required|numeric',
+            'foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'lokasi' => 'required|string',
         ]);
 
-        // Get today's date and the current time
         $today = now()->toDateString();
         $currentTime = now();
 
-        // Get shift information for the current user and today's date
+        // Pastikan user belum absen hari ini
+        $existingAbsensi = Absensi::where('karyawan', Auth::id())
+            ->where('tanggal', $today)
+            ->where('jenis', 'Masuk')
+            ->first();
+
+        if ($existingAbsensi) {
+            return response()->json(['message' => 'Anda sudah absen masuk hari ini.'], 400);
+        }
+
+        // Ambil informasi shift untuk user
         $lokasi = Lokasi::where('karyawan', Auth::id())
             ->whereDate('tanggal', $today)
             ->first();
 
-        // If no shift information is found for today, return an error
         if (!$lokasi) {
             return response()->json(['message' => 'Shift tidak ditemukan untuk hari ini.'], 400);
         }
 
-        // Get company location (latitude and longitude) from the settings table
-        $setting = Setting::first();  // Assuming there's only one settings entry
+        // Ambil lokasi kantor dari tabel settings
+        $setting = Setting::first();
 
-        if (!$setting) {
-            return response()->json(['message' => 'Lokasi kantor tidak ditemukan.'], 400);
+        if (!$setting || !$setting->lat || !$setting->lon) {
+            return response()->json(['message' => 'Lokasi kantor tidak ditemukan atau belum diatur.'], 400);
         }
 
+        // Kalkulasi jarak lokasi user dan kantor
         $kantorLat = $setting->lat;
         $kantorLng = $setting->lon;
-
-        // Calculate the distance between user location and office location (in meters)
         $distance = $this->haversineGreatCircleDistance($request->lat, $request->lng, $kantorLat, $kantorLng);
 
-        // If the distance is greater than 100 meters, return an error
         if ($distance > 100) {
-            return response()->json(['message' => 'Anda berada di luar jangkauan untuk absen. Jarak ke kantor terlalu jauh.'], 400);
+            return response()->json(['message' => 'Anda berada di luar jangkauan untuk absen.'], 400);
         }
 
-        // Create a new Absensi entry
+        // Buat entri absensi baru
         $absensi = new Absensi();
-        $absensi->tanggal = $today;  // Set today's date
+        $absensi->tanggal = $today;
         $absensi->lat = $request->lat;
         $absensi->lng = $request->lng;
         $absensi->karyawan = Auth::id();
         $absensi->jenis = 'Masuk';
-        $absensi->jam = $currentTime;  // Set current time
+        $absensi->jam = $currentTime;
         $absensi->lokasi = $request->lokasi;
-        $absensi->shift = $lokasi->shift;  // Get shift from Lokasi table
-        $absensi->ip_address = $request->ip();  // Get user's IP address
+        $absensi->shift = $lokasi->shift;
+        $absensi->ip_address = $request->ip();
 
-        // Determine if the user is late (dt = 1 if late, 0 otherwise)
-        $jamMasukShift = Carbon::parse($lokasi->jam_masuk);  // Parse shift's jam_masuk time
+        // Cek keterlambatan
+        $jamMasukShift = Carbon::parse($lokasi->jam_masuk);
         if ($currentTime->greaterThan($jamMasukShift)) {
-            $absensi->dt = 1;  // Mark as late
+            $absensi->dt = 1;
             $absensi->keterangan = 'Datang Terlambat';
-            $absensi->waktu_dt = $currentTime->diffInMinutes($jamMasukShift);  // Store the number of minutes late
+            $absensi->waktu_dt = $currentTime->diffInMinutes($jamMasukShift);
         } else {
-            $absensi->dt = 0;  // On time
+            $absensi->dt = 0;
             $absensi->keterangan = 'Tepat Waktu';
             $absensi->waktu_dt = 0;
         }
 
-        // Upload foto absen masuk
+        // Upload foto absen
         if ($request->hasFile('foto')) {
             $file = $request->file('foto');
-            $filename = 'foto_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/absensi'), $filename);
-            $absensi->fhoto = $filename;
+            if ($file->isValid()) {
+                $filename = 'foto_' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/absensi'), $filename);
+                $absensi->foto = $filename;
+            } else {
+                return response()->json(['message' => 'Gagal mengunggah foto.'], 500);
+            }
         }
 
         $absensi->save();
@@ -119,6 +129,7 @@ class AbsensiController extends Controller
         return response()->json([
             'message' => 'Absen Masuk berhasil disimpan!',
             'jamMasuk' => $absensi->jam->format('H:i:s'),
+            'absenId' => $absensi->id,  // Kembalikan ID absen untuk digunakan saat absen pulang
         ]);
     }
     private function haversineGreatCircleDistance($lat1, $lon1, $lat2, $lon2, $earthRadius = 6371000)
@@ -138,15 +149,21 @@ class AbsensiController extends Controller
     }
 
     // Fungsi untuk mencatat absensi pulang
-    public function absenPulang(Request $request, $id)
+    public function absenPulang(Request $request)
     {
+        // Cari absensi untuk karyawan yang login dengan tanggal hari ini
         $absensi = Absensi::where('karyawan', Auth::id())
-            ->where('jenis', 'Masuk')
-            ->whereNull('jam_pulang')
-            ->firstOrFail();
+            ->where('tanggal', now()->toDateString())
+            ->where('jenis', 'Masuk')  // Pastikan absensi jenis "Masuk" (karena yang akan di-update adalah absen masuk)
+            ->first();
 
+        // Jika absensi tidak ditemukan
+        if (!$absensi) {
+            return response()->json(['message' => 'Absensi masuk tidak ditemukan untuk hari ini.'], 404);
+        }
+
+        // Update jam pulang
         $absensi->jam_pulang = now();
-        $absensi->tgl_pulang = now();
         $absensi->save();
 
         return response()->json([

@@ -5,6 +5,8 @@ use App\Http\Controllers\CutiController;
 use App\Http\Controllers\CutilemburController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IzinController;
+use App\Http\Controllers\KalenderKerjaController;
+use App\Http\Controllers\LemburController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SessionsController;
@@ -46,7 +48,8 @@ Route::middleware('auth')->group(function () {
     //ABSENSi
     Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi');
     Route::post('/absensi/masuk', [AbsensiController::class, 'absenMasuk'])->name('absensi.masuk');
-    Route::post('/absensi/pulang/{id}', [AbsensiController::class, 'absenPulang'])->name('absensi.pulang');
+    Route::post('/absensi/pulang', [AbsensiController::class, 'absenPulang'])->name('absensi.pulang');
+
     //Cutilembur
     // Route::get('/form-izin', [CutilemburController::class, 'index'])->name('cutilembur.index');
     // Route::post('/form-izin', [CutilemburController::class, 'store'])->name('cutilembur.store');
@@ -61,6 +64,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/izin/delete/{id}', [IzinController::class, 'destroy'])->name('izin.destroy');
     //CUTI
     Route::resource('cuti', CutiController::class)->except(['create', 'show']);
+    //LEMBUR
+    Route::get('/lembur', [LemburController::class, 'index'])->name('lembur.index');
+    Route::post('/lembur', [LemburController::class, 'store'])->name('lembur.store');
+    Route::delete('/lembur/{id}', [LemburController::class, 'destroy'])->name('lembur.destroy');
+    Route::post('/lembur/redeem', [LemburController::class, 'redeem'])->name('lembur.redeem');
+
+    //Kalender kerja
+    Route::get('kalender_kerja', [KalenderKerjaController::class, 'index'])->name('kalender_kerja.index');
+    Route::post('kalender_kerja/upload', [KalenderKerjaController::class, 'uploadKalenderKerja'])->name('kalender_kerja.upload');
     //PROFIL
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
 

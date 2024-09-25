@@ -83,19 +83,20 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link text-white {{ $activePage == 'form-lembur' ? ' active bg-gradient-primary' : '' }}"
+                                href="{{ route('lembur.index') }}">
+                                <i class="material-icons opacity-10">receipt_long</i>
+                                <span class="nav-link-text">Form Lembur</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link text-white {{ $activePage == 'tukar-shift' ? ' active bg-gradient-primary' : '' }}"
                                 href="{{ route('tukarshift') }}">
                                 <i class="material-icons opacity-10">receipt_long</i>
                                 <span class="nav-link-text">Tukar Shift</span>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white {{ $activePage == 'tukar-deposit' ? ' active bg-gradient-primary' : '' }}"
-                                href="{{ route('tukardepo') }}">
-                                <i class="material-icons opacity-10">receipt_long</i>
-                                <span class="nav-link-text">Tukar Deposit</span>
-                            </a>
-                        </li>
+
                         <li class="nav-item">
                             <a class="nav-link text-white {{ $activePage == 'dinas-luar' ? ' active bg-gradient-primary' : '' }}"
                                 href="{{ route('dinasluar') }}">
@@ -135,6 +136,15 @@
                         <i class="material-icons opacity-10">receipt_long</i>
                     </div>
                     <span class="nav-link-text ms-1">Kalender Kerja</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white {{ $activePage == 'kalender-kerja' ? ' active bg-gradient-primary' : '' }}  "
+                    href="{{ route('kalender_kerja.index') }}">
+                    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="material-icons opacity-10">receipt_long</i>
+                    </div>
+                    <span class="nav-link-text ms-1">Kalender Kerja2</span>
                 </a>
             </li>
 

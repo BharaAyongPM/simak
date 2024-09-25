@@ -70,6 +70,7 @@
                                                 <tr>
                                                     <th>No</th>
                                                     <th>Shift</th>
+                                                    <th>Tanggal</th>
                                                     <th>Jam Masuk</th>
                                                     <th>Jam Pulang</th>
                                                     <th>Lokasi</th>
@@ -77,11 +78,12 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <!-- Loop through multiple absensi records -->
                                                 @foreach ($absensi as $index => $log)
                                                     <tr>
                                                         <td>{{ $index + 1 }}</td>
                                                         <td>{{ $log->shift ?? 'N/A' }}</td>
+                                                        <td>{{ \Carbon\Carbon::parse($log->tanggal)->format('d-M-Y') ?? 'Belum Absen' }}
+                                                        </td>
                                                         <td>{{ $log->jam ?? 'Belum Absen' }}</td>
                                                         <td>{{ $log->jam_pulang ?? 'Belum Pulang' }}</td>
                                                         <td>{{ $log->lokasi ?? 'Tidak diketahui' }}</td>
@@ -92,6 +94,7 @@
                                         </table>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -240,13 +243,23 @@
                     return; // Stop form submission
                 }
 
+                // Mengambil data dari canvas
+                let canvas = document.getElementById('canvas');
+                let imageData = canvas.toDataURL('image/png'); // Mendapatkan gambar dalam format base64
+
+                // Mengubah base64 menjadi file Blob
+                let blob = dataURItoBlob(imageData);
+                let file = new File([blob], 'absen.png', {
+                    type: 'image/png'
+                }); // Membuat file gambar dari Blob
+
                 // Proceed with absen submission if the location is within range
                 let absenType = document.getElementById('absenModalLabel').innerText.includes('Masuk') ? 'masuk' : 'pulang';
                 let formData = new FormData();
                 formData.append('lat', document.getElementById('latitude').value);
                 formData.append('lng', document.getElementById('longitude').value);
                 formData.append('lokasi', document.getElementById('namaLokasi').innerText);
-                formData.append('foto', canvas.toDataURL('image/png'));
+                formData.append('foto', file); // Mengirim file gambar
                 formData.append('_token', '{{ csrf_token() }}'); // Menambahkan CSRF token
 
                 if (absenType === 'masuk') {
@@ -262,32 +275,80 @@
                             alert(response.message);
                             $('#absenModal').modal('hide');
                         },
-                        error: function(error) {
-                            alert('Gagal melakukan absen. Silakan coba lagi.');
+                        error: function(xhr, status, error) {
+                            // Mendapatkan pesan error dari response JSON
+                            let errorMessage = xhr.responseJSON.message || 'ABSEN GAGAL';
+                            alert(errorMessage);
                         }
                     });
                 } else {
-                    if (absenId) {
-                        $.ajax({
-                            url: `/absensi/pulang/${absenId}`,
-                            method: 'POST',
-                            data: formData,
-                            processData: false,
-                            contentType: false,
-                            success: function(response) {
-                                $('#jamPulang').text(response.jamPulang);
-                                alert(response.message);
-                                $('#absenModal').modal('hide');
-                            },
-                            error: function(error) {
-                                alert('Gagal melakukan absen pulang. Silakan coba lagi.');
-                            }
-                        });
-                    } else {
-                        alert('Gagal melakukan absen pulang. ID absensi tidak ditemukan.');
-                    }
+                    $.ajax({
+                        url: "{{ route('absensi.pulang') }}", // Langsung panggil absen pulang tanpa absenId
+                        method: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            $('#jamPulang').text(response.jamPulang);
+                            alert(response.message);
+                            $('#absenModal').modal('hide');
+                        },
+                        error: function(xhr) {
+                            let errorMessage = xhr.responseJSON.message || 'ABSEN PULANG GAGAL';
+                            alert(errorMessage);
+                        }
+                    });
                 }
+            }
+
+            // Fungsi untuk konversi base64 ke Blob
+            function dataURItoBlob(dataURI) {
+                let byteString = atob(dataURI.split(',')[1]);
+                let mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+                let ab = new ArrayBuffer(byteString.length);
+                let ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+
+                return new Blob([ab], {
+                    type: mimeString
+                });
             }
         </script>
     @endpush
+    @push('js')
+        <!-- jQuery and DataTables JS -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+
+        <!-- Initialize DataTables -->
+        <script>
+            $(document).ready(function() {
+                $('#logAbsenTable').DataTable({
+                    paging: true,
+                    searching: true,
+                    ordering: true,
+                    info: true,
+                    lengthMenu: [5, 10, 15, 20],
+                    language: {
+                        lengthMenu: "Tampilkan _MENU_ entri per halaman",
+                        zeroRecords: "Tidak ada data yang ditemukan",
+                        info: "Menampilkan _PAGE_ dari _PAGES_ halaman",
+                        infoEmpty: "Tidak ada data tersedia",
+                        infoFiltered: "(disaring dari _MAX_ total entri)",
+                        search: "Cari:",
+                        paginate: {
+                            next: "Berikutnya",
+                            previous: "Sebelumnya"
+                        }
+                    }
+                });
+            });
+        </script>
+    @endpush
+
+
 </x-layout>
