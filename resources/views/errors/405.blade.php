@@ -14,12 +14,12 @@
         <div class="container text-center">
             <div class="row">
                 <div class="col-md-12">
-                  <h1 class="title text-light">405</h1>
-                  <h2 class="text-light">Method Not Allowed </h2>
-                  <h4 class="text-light">Ooooups! Looks like you got lost.</h4>
+                    <h1 class="title text-light">405</h1>
+                    <h2 class="text-light">Method Not Allowed </h2>
+                    <h4 class="text-light">Anda Tidak Diizinkan Untuk Akses Halaman ini </h4>
                 </div>
-              </div>
+            </div>
         </div>
     </div>
-        <x-footers.guest></x-footers.guest>
+    <x-footers.guest></x-footers.guest>
 </x-layout>

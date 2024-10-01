@@ -42,7 +42,10 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Level::class, 'level', 'id'); // Sesuaikan dengan foreign key 'level' di tabel users
     }
-
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
+    }
     /**
      * The attributes that are mass assignable.
      *

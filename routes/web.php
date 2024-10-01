@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CutiController;
 use App\Http\Controllers\CutilemburController;
 use App\Http\Controllers\DashboardController;
@@ -73,11 +74,33 @@ Route::middleware('auth')->group(function () {
     //Kalender kerja
     Route::get('kalender_kerja', [KalenderKerjaController::class, 'index'])->name('kalender_kerja.index');
     Route::post('kalender_kerja/upload', [KalenderKerjaController::class, 'uploadKalenderKerja'])->name('kalender_kerja.upload');
+    Route::post('/kalender_kerja/update-shift', [KalenderKerjaController::class, 'updateShift'])->name('kalender_kerja.update_shift');
     //PROFIL
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     // Route untuk logout (destroy method)
     Route::post('/logout', [SessionsController::class, 'destroy'])->name('logout');
+
+    Route::middleware(['auth', 'role:ADMIN'])->group(function () {
+        Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
+        // CRUD Karyawan
+        Route::get('/karyawan', [AdminController::class, 'listKaryawan'])->name('admin.karyawan.list');
+        Route::get('/karyawan/create', [AdminController::class, 'createKaryawan'])->name('admin.karyawan.create');
+        Route::post('/karyawan/store', [AdminController::class, 'storeKaryawan'])->name('admin.karyawan.store');
+        Route::get('/karyawan/{id}/edit', [AdminController::class, 'editKaryawan'])->name('admin.karyawan.edit');
+        Route::post('/karyawan/{id}/update', [AdminController::class, 'updateKaryawan'])->name('admin.karyawan.update');
+        Route::delete('/karyawan/{id}/delete', [AdminController::class, 'deleteKaryawan'])->name('admin.karyawan.delete');
+
+        // Absensi
+        Route::get('/absensi/cek', [AdminController::class, 'cekAbsensi'])->name('admin.absensi.cek');
+        Route::get('/absensi/rekap', [AdminController::class, 'rekapAbsensi'])->name('admin.absensi.rekap');
+        Route::get('/absensi/export', [AdminController::class, 'exportAbsensi'])->name('admin.absensi.export');
+
+        // User Management
+        Route::get('/user-management', [AdminController::class, 'userManagement'])->name('admin.user.management');
+        Route::put('/admin/user/{userId}/update-role', [AdminController::class, 'updateUserRole'])->name('admin.user.role.update');
+    });
 
     // Halaman user management juga menggunakan middleware
     Route::get('/user', function () {

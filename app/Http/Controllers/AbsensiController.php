@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Absensi;
+use App\Models\KalenderKerja;
 use App\Models\Karyawan;
 use App\Models\Lokasi;
 use App\Models\Setting;
@@ -19,7 +20,7 @@ class AbsensiController extends Controller
         $today = now()->format('Y-m-d');
 
         // Fetch today's shift information for the logged-in user
-        $lokasi = Lokasi::with(['karyn', 'bag', 'unt'])
+        $lokasi = KalenderKerja::with(['karyn', 'bag', 'unt'])
             ->where('karyawan', Auth::id())
             ->whereDate('tanggal', $today)
             ->first();

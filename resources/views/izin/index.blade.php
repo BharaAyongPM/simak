@@ -284,8 +284,8 @@
                         "infoFiltered": "(disaring dari _MAX_ total entri)",
                         "search": "Cari:",
                         "paginate": {
-                            "next": "Berikutnya",
-                            "previous": "Sebelumnya"
+                            "next": ">>",
+                            "previous": "<<"
                         }
                     }
                 });
