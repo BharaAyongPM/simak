@@ -14,7 +14,49 @@
     <hr class="horizontal light mt-0 mb-2">
     <div class="collapse navbar-collapse  w-auto  max-height-vh-100" id="sidenav-collapse-main">
         <ul class="navbar-nav">
-            <li class="nav-item mt-3">
+            <!-- Menu khusus admin -->
+            @if (auth()->user()->roles->contains('name', 'ADMIN'))
+                <li class="nav-item mt-3">
+                    <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Admin Menu</h6>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'admin.karyawan.list' ? 'active bg-gradient-primary' : '' }}"
+                        href="{{ route('admin.karyawan.list') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">people</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Kelola Karyawan</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'admin.absensi.cek' ? 'active bg-gradient-primary' : '' }}"
+                        href="{{ route('admin.absensi.cek') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">schedule</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Cek Absensi</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'admin.absensi.rekap' ? 'active bg-gradient-primary' : '' }}"
+                        href="{{ route('admin.absensi.rekap') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">assignment</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Rekap Absensi</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'admin.user.management' ? 'active bg-gradient-primary' : '' }}"
+                        href="{{ route('admin.user.management') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">manage_accounts</i>
+                        </div>
+                        <span class="nav-link-text ms-1">User Management</span>
+                    </a>
+                </li>
+            @endif
+            {{-- <li class="nav-item mt-3">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Data Profil
                 </h6>
             </li>
@@ -35,7 +77,7 @@
                     </div>
                     <span class="nav-link-text ms-1">User Management</span>
                 </a>
-            </li>
+            </li> --}}
             <li class="nav-item mt-3">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Pages</h6>
             </li>

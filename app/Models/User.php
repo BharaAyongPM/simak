@@ -28,6 +28,10 @@ class User extends Authenticatable
     public $timestamps = true;
 
     // Relasi ke tabel 'bag' menggunakan foreign key 'divisi'
+    public function bagian()
+    {
+        return $this->belongsTo(Bag::class, 'divisi'); // Kolom 'divisi' mengacu ke ID di tabel bag
+    }
     public function bag()
     {
         return $this->belongsTo(Bag::class, 'divisi', 'id_bagian');

@@ -65,7 +65,7 @@ class AbsensiController extends Controller
         }
 
         // Ambil informasi shift untuk user
-        $lokasi = Lokasi::where('karyawan', Auth::id())
+        $lokasi = KalenderKerja::where('karyawan', Auth::id())
             ->whereDate('tanggal', $today)
             ->first();
 

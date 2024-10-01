@@ -28,9 +28,13 @@ class Absensi extends Model
     public $timestamps = true;  // Menggunakan timestamps (created_at, updated_at)
 
     // Relasi dengan tabel user untuk karyawan yang melakukan absensi
+    // public function karyn()
+    // {
+    //     return $this->belongsTo(User::class, 'karyawan', 'id');  // 'karyawan' adalah FK di tabel absensi yang mengacu pada 'id' di tabel user
+    // }
     public function karyn()
     {
-        return $this->belongsTo(User::class, 'karyawan', 'id');  // 'karyawan' adalah FK di tabel absensi yang mengacu pada 'id' di tabel user
+        return $this->belongsTo(User::class, 'karyawan'); // karyawan mengacu ke ID user di tabel absensi
     }
 
     // Tambahkan lebih banyak fungsi relasi jika diperlukan untuk pengelolaan absensi
