@@ -11,7 +11,15 @@ class Unit extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'departemen',
+        'bagian',
         'unit'
     ];
+    public function bagian()
+    {
+        return $this->belongsTo(Bag::class, 'bagian_id'); // 'bagian_id' adalah foreign key di tabel 'units'
+    }
+    public function users()
+    {
+        return $this->hasMany(User::class, 'unit', 'id');
+    }
 }

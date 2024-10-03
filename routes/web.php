@@ -7,6 +7,7 @@ use App\Http\Controllers\CutilemburController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IzinController;
 use App\Http\Controllers\KalenderKerjaController;
+use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\LemburController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
@@ -107,3 +108,17 @@ Route::middleware('auth')->group(function () {
         return view('pages/laravel-examples/user-management');
     })->name('user-management');
 });
+Route::group(['middleware' => ['auth', 'role:ADMIN|HRD']], function () {
+    // Route untuk menampilkan data karyawan (index)
+    Route::get('/karyawan', [KaryawanController::class, 'index'])->name('karyawan.index');
+
+    // Route untuk menyimpan data karyawan baru (store)
+    Route::post('/karyawan', [KaryawanController::class, 'store'])->name('karyawan.store');
+
+    // Route untuk memperbarui data karyawan yang sudah ada (update)
+    Route::put('/karyawan/{user}', [KaryawanController::class, 'update'])->name('karyawan.update');
+
+    // Route untuk menghapus data karyawan (delete)
+    Route::delete('/karyawan/{user}', [KaryawanController::class, 'destroy'])->name('karyawan.destroy');
+});
+Route::get('/get-units-by-bagian/{bagian_id}', [AdminController::class, 'getUnitsByBagian'])->name('get.units.by.bagian');

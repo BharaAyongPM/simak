@@ -22,7 +22,21 @@ class User extends Authenticatable
         'aktif',
         'tgl_mulai',
         'tgl_akhir',
-        'unit'
+        'unit',
+        'nik',
+        'jabatan',
+        'tgl_masuk',
+        'alamat',
+        'no_telp',
+        'status_kar',
+        'kelamin',
+        'agama',
+        'tgl_lahir',
+        'gaji',
+        'shift',
+        'absensi',
+        'pot_dt',
+
     ];
 
     public $timestamps = true;
@@ -49,6 +63,10 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
+    }
+    public function hasRole($roleName)
+    {
+        return $this->roles->contains('name', $roleName);
     }
     /**
      * The attributes that are mass assignable.

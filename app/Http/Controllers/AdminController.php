@@ -123,10 +123,9 @@ class AdminController extends Controller
     {
         $query = Absensi::query();
 
-        // Filter berdasarkan bagian (divisi)
+        // Filter berdasarkan divisi (bagian)
         if ($request->has('bagian_id') && $request->bagian_id) {
             $bagianId = $request->input('bagian_id');
-            // Menyaring karyawan berdasarkan divisi (bagian) dari tabel user
             $query->whereHas('karyn', function ($q) use ($bagianId) {
                 $q->where('divisi', $bagianId); // 'divisi' adalah kolom di tabel user yang mengarah ke 'id_bagian'
             });
@@ -135,20 +134,23 @@ class AdminController extends Controller
         // Filter berdasarkan unit (jika ada)
         if ($request->has('unit_id') && $request->unit_id) {
             $unitId = $request->input('unit_id');
-            // Menggunakan 'unit' bukan 'unit_id', karena mengarah ke nama field 'unit' di tabel users
             $query->whereHas('karyn', function ($q) use ($unitId) {
-                $q->where('unit', $unitId); // Pastikan 'unit' adalah nama kolom yang benar di tabel users
+                $q->where('unit', $unitId); // 'unit' adalah nama kolom yang benar di tabel users
             });
         }
 
         // Filter berdasarkan tanggal awal dan akhir
         $tanggalAwal = $request->input('tanggal_awal', Carbon::now()->startOfMonth()->toDateString());
         $tanggalAkhir = $request->input('tanggal_akhir', Carbon::now()->endOfMonth()->toDateString());
-
         $query->whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir]);
 
-        // Ambil data absensi dengan paginasi untuk ditampilkan di DataTables
-        $absensis = $query->with(['karyn.bagian', 'karyn.unt'])->paginate(10); // Relasi ke karyawan, bagian, unit
+        // Ambil parameter dari DataTables
+        $length = $request->input('length', 10); // Jumlah data per halaman
+        $start = $request->input('start', 0); // Mulai dari data ke berapa
+        $page = ($start / $length) + 1; // Hitung halaman berdasarkan 'start'
+
+        // Ambil data absensi dengan paginasi yang sesuai dengan permintaan DataTables
+        $absensis = $query->with(['karyn.bagian', 'karyn.unt'])->paginate($length, ['*'], 'page', $page);
 
         // Mengambil semua bagian dan unit untuk dropdown filter
         $bagians = Bag::all(); // Asumsi model 'Bag' untuk tabel 'bag'
@@ -161,9 +163,9 @@ class AdminController extends Controller
                 $data[] = [
                     'no' => $index + 1 + ($absensis->currentPage() - 1) * $absensis->perPage(),
                     'tanggal' => $absensi->tanggal,
-                    'karyawan_name' => $absensi->karyn->name ?? 'Data tidak ditemukan', // Fix kolom untuk DataTables
+                    'karyawan_name' => $absensi->karyn->name ?? 'Data tidak ditemukan',
                     'bagian_name' => $absensi->karyn->bagian->nama_bagian ?? '-',
-                    'unit' => $absensi->karyn->unt->unit,
+                    'unit' => $absensi->karyn->unt->unit ?? '-',
                     'shift' => $absensi->shift,
                     'jam' => $absensi->jam,
                     'jam_pulang' => $absensi->jam_pulang,
@@ -182,6 +184,14 @@ class AdminController extends Controller
 
         return view('admin.absensi.rekap', compact('absensis', 'bagians', 'units', 'tanggalAwal', 'tanggalAkhir'));
     }
+    public function getUnitsByBagian($bagianId)
+    {
+        // Ambil unit berdasarkan bagian yang dipilih
+        $units = Unit::where('bagian', $bagianId)->get(); // Sesuaikan dengan field yang menghubungkan unit dan bagian
+
+        return response()->json($units);
+    }
+
 
 
 

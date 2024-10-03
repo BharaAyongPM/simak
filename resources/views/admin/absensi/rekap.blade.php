@@ -17,11 +17,12 @@
                                     <!-- Pilih Bagian -->
                                     <div class="col-md-3">
                                         <label for="bagian_id" class="form-label">Pilih Bagian:</label>
-                                        <select name="bagian_id" class="form-control select2" style="width: 200px;">
+                                        <select name="bagian_id" id="bagian_id" class="form-control select2"
+                                            style="width: 200px;">
                                             <option value="">Pilih Bagian</option>
                                             @foreach ($bagians as $bagian)
                                                 <option value="{{ $bagian->id_bagian }}"
-                                                    {{ request('id_bagian') == $bagian->id_bagian ? 'selected' : '' }}>
+                                                    {{ request('bagian_id') == $bagian->id_bagian ? 'selected' : '' }}>
                                                     {{ $bagian->nama_bagian }}
                                                 </option>
                                             @endforeach
@@ -31,14 +32,9 @@
                                     <!-- Pilih Unit -->
                                     <div class="col-md-3">
                                         <label for="unit_id" class="form-label">Pilih Unit:</label>
-                                        <select name="unit_id" class="form-control select2">
+                                        <select name="unit_id" id="unit_id" class="form-control select2">
                                             <option value="">Semua Unit</option>
-                                            @foreach ($units as $unit)
-                                                <option value="{{ $unit->id }}"
-                                                    {{ request('unit_id') == $unit->id ? 'selected' : '' }}>
-                                                    {{ $unit->unit }}
-                                                </option>
-                                            @endforeach
+                                            <!-- Unit akan dimuat secara dinamis melalui AJAX -->
                                         </select>
                                     </div>
 
@@ -55,9 +51,6 @@
                                         <input type="date" name="tanggal_akhir" class="form-control"
                                             value="{{ request('tanggal_akhir', now()->endOfMonth()->toDateString()) }}">
                                     </div>
-
-                                    <!-- Tombol Filter -->
-
                                 </div>
                             </form>
                         </div>
@@ -88,7 +81,7 @@
                                                 <td>{{ $absensi->tanggal }}</td>
                                                 <td>{{ $absensi->karyn->name ?? 'Tidak ditemukan' }}</td>
                                                 <td>{{ $absensi->karyn->bagian->nama_bagian ?? '-' }}</td>
-                                                <td>{{ $absensi->karyn->unit->nama_unit ?? '-' }}</td>
+                                                <td>{{ $absensi->karyn->unit->unit ?? '-' }}</td>
                                                 <td>{{ $absensi->shift }}</td>
                                                 <td>{{ $absensi->jam_masuk }}</td>
                                                 <td>{{ $absensi->jam_pulang }}</td>
@@ -106,9 +99,9 @@
                             </div>
 
                             <!-- Pagination -->
-                            <div class="mt-3">
+                            {{-- <div class="mt-3">
                                 {{ $absensis->links() }}
-                            </div>
+                            </div> --}}
 
                             <!-- Tombol Export Excel -->
                             <div class="mt-3">
@@ -161,7 +154,7 @@
                         }, // Nama Bagian
                         {
                             "data": "unit",
-
+                            defaultContent: "-"
                         }, // Nama Unit
                         {
                             "data": "shift"
@@ -202,6 +195,42 @@
                         "infoEmpty": "Tidak ada data",
                         "zeroRecords": "Data tidak ditemukan",
                         "infoFiltered": "(disaring dari _MAX_ total data)"
+                    }
+                });
+
+                // Inisialisasi Select2
+
+
+                // Ambil unit berdasarkan bagian melalui AJAX
+                $('#bagian_id').on('change', function() {
+                    var bagianId = $(this).val(); // Ambil nilai bagian yang dipilih
+
+                    // Kosongkan dropdown unit sebelum memuat data baru
+                    $('#unit_id').empty();
+                    $('#unit_id').append('<option value="">Pilih Unit</option>'); // Opsi default
+
+                    // Hanya kirim AJAX jika ada bagian yang dipilih
+                    if (bagianId) {
+                        $.ajax({
+                            url: "/get-units-by-bagian/" + bagianId,
+                            type: "GET",
+                            dataType: "json",
+                            success: function(units) {
+                                if (units.length === 0) {
+                                    $('#unit_id').append(
+                                        '<option value="">Tidak ada unit tersedia</option>');
+                                }
+                                // Tambahkan unit ke dalam dropdown
+                                $.each(units, function(key, unit) {
+                                    $('#unit_id').append('<option value="' + unit.id +
+                                        '">' + unit.unit + '</option>');
+                                });
+                            },
+                            error: function(xhr) {
+                                console.error("Gagal memuat unit", xhr);
+                                $('#unit_id').append('<option value="">Gagal memuat unit</option>');
+                            }
+                        });
                     }
                 });
 

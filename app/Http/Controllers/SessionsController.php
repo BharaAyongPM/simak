@@ -81,6 +81,6 @@ class SessionsController extends Controller
     {
         auth()->logout();
 
-        return redirect('/sign-in');
+        return redirect('/');
     }
 }

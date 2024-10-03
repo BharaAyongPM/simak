@@ -19,15 +19,7 @@
                 <li class="nav-item mt-3">
                     <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Admin Menu</h6>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white {{ $activePage == 'admin.karyawan.list' ? 'active bg-gradient-primary' : '' }}"
-                        href="{{ route('admin.karyawan.list') }}">
-                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                            <i class="material-icons opacity-10">people</i>
-                        </div>
-                        <span class="nav-link-text ms-1">Kelola Karyawan</span>
-                    </a>
-                </li>
+
                 <li class="nav-item">
                     <a class="nav-link text-white {{ $activePage == 'admin.absensi.cek' ? 'active bg-gradient-primary' : '' }}"
                         href="{{ route('admin.absensi.cek') }}">
@@ -56,6 +48,23 @@
                     </a>
                 </li>
             @endif
+            @if (auth()->user()->roles->contains('name', 'ADMIN') || auth()->user()->roles->contains('name', 'HRD'))
+                <li class="nav-item mt-3">
+                    <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Data Master
+                    </h6>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'karyawan' ? 'active bg-gradient-primary' : '' }}"
+                        href="{{ route('karyawan.index') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">people</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Kelola Karyawan</span>
+                    </a>
+                </li>
+            @endif
+
+
             {{-- <li class="nav-item mt-3">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Data Profil
                 </h6>

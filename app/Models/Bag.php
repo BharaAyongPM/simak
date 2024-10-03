@@ -13,4 +13,8 @@ class Bag extends Model
     protected $fillable = [
         'nama_bagian', // Kolom yang akan diakses
     ];
+    public function units()
+    {
+        return $this->hasMany(Unit::class, 'bagian_id'); // 'bagian_id' adalah foreign key di tabel 'units'
+    }
 }
