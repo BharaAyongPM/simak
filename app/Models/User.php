@@ -17,14 +17,13 @@ class User extends Authenticatable
         'email',
         'password',
         'foto',
-        'level',
         'divisi',
         'aktif',
         'tgl_mulai',
         'tgl_akhir',
         'unit',
         'nik',
-        'jabatan',
+        'jabatan_id',
         'tgl_masuk',
         'alamat',
         'no_telp',
@@ -44,7 +43,7 @@ class User extends Authenticatable
     // Relasi ke tabel 'bag' menggunakan foreign key 'divisi'
     public function bagian()
     {
-        return $this->belongsTo(Bag::class, 'divisi'); // Kolom 'divisi' mengacu ke ID di tabel bag
+        return $this->belongsTo(Bag::class, 'divisi', 'id_bagian');
     }
     public function bag()
     {
@@ -67,6 +66,10 @@ class User extends Authenticatable
     public function hasRole($roleName)
     {
         return $this->roles->contains('name', $roleName);
+    }
+    public function jabatan()
+    {
+        return $this->belongsTo(Jabatan::class, 'jabatan_id');
     }
     /**
      * The attributes that are mass assignable.

@@ -53,10 +53,10 @@
                                         </div>
                                     @endif
                                     <div class="input-group input-group-outline mt-3">
-                                        <label class="form-label">Email</label>
-                                        <input type="text" class="form-control" name="email">
+                                        <label class="form-label">NIK</label>
+                                        <input type="text" class="form-control" name="nik">
                                     </div>
-                                    @error('email')
+                                    @error('nik')
                                         <p class='text-danger inputerror'>{{ $message }} </p>
                                     @enderror
                                     <div class="input-group input-group-outline mt-3">

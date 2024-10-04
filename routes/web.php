@@ -2,16 +2,20 @@
 
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\BagianController;
 use App\Http\Controllers\CutiController;
 use App\Http\Controllers\CutilemburController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IzinController;
+use App\Http\Controllers\JabatanController;
+use App\Http\Controllers\JeniscutiController;
 use App\Http\Controllers\KalenderKerjaController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\LemburController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SessionsController;
+use App\Http\Controllers\ShiftController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -111,14 +115,32 @@ Route::middleware('auth')->group(function () {
 Route::group(['middleware' => ['auth', 'role:ADMIN|HRD']], function () {
     // Route untuk menampilkan data karyawan (index)
     Route::get('/karyawan', [KaryawanController::class, 'index'])->name('karyawan.index');
-
-    // Route untuk menyimpan data karyawan baru (store)
     Route::post('/karyawan', [KaryawanController::class, 'store'])->name('karyawan.store');
-
-    // Route untuk memperbarui data karyawan yang sudah ada (update)
     Route::put('/karyawan/{user}', [KaryawanController::class, 'update'])->name('karyawan.update');
-
-    // Route untuk menghapus data karyawan (delete)
     Route::delete('/karyawan/{user}', [KaryawanController::class, 'destroy'])->name('karyawan.destroy');
+    //Jabatan
+    Route::get('/jabatans', [JabatanController::class, 'index'])->name('jabatans.index');
+    Route::post('/jabatans', [JabatanController::class, 'store'])->name('jabatans.store');
+    Route::get('/jabatans/edit/{id}', [JabatanController::class, 'edit'])->name('jabatans.edit');
+    Route::put('/jabatans/update/{id}', [JabatanController::class, 'update'])->name('jabatans.update');
+    Route::delete('/jabatans/{id}', [JabatanController::class, 'destroy'])->name('jabatans.destroy');
+    //Shift
+    Route::get('/shifts', [ShiftController::class, 'index'])->name('shifts.index');
+    Route::post('/shifts', [ShiftController::class, 'store'])->name('shifts.store');
+    Route::get('/shifts/edit/{id}', [ShiftController::class, 'edit'])->name('shifts.edit');
+    Route::put('/shifts/update/{id}', [ShiftController::class, 'update'])->name('shifts.update');
+    Route::delete('/shifts/{id}', [ShiftController::class, 'destroy'])->name('shifts.destroy');
+    //Jnis Cuti
+    Route::get('/jeniscuti', [JeniscutiController::class, 'index'])->name('jeniscuti.index');
+    Route::post('/jeniscuti', [JeniscutiController::class, 'store'])->name('jeniscuti.store');
+    Route::get('/jeniscuti/edit/{id}', [JeniscutiController::class, 'edit'])->name('jeniscuti.edit');
+    Route::put('/jeniscuti/update/{id}', [JeniscutiController::class, 'update'])->name('jeniscuti.update');
+    Route::delete('/jeniscuti/{id}', [JeniscutiController::class, 'destroy'])->name('jeniscuti.destroy');
+    //Bagian
+    Route::get('/bagian', [BagianController::class, 'index'])->name('bagian.index');
+    Route::post('/bagian', [BagianController::class, 'store'])->name('bagian.store');
+    Route::get('/bagian/edit/{id}', [BagianController::class, 'edit'])->name('bagian.edit');
+    Route::put('/bagian/update/{id}', [BagianController::class, 'update'])->name('bagian.update');
+    Route::delete('/bagian/{id}', [BagianController::class, 'destroy'])->name('bagian.destroy');
 });
 Route::get('/get-units-by-bagian/{bagian_id}', [AdminController::class, 'getUnitsByBagian'])->name('get.units.by.bagian');

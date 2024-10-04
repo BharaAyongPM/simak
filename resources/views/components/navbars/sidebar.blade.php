@@ -62,6 +62,42 @@
                         <span class="nav-link-text ms-1">Kelola Karyawan</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'jabatans' ? 'active bg-gradient-primary' : '' }}"
+                        href="{{ route('jabatans.index') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">person</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Kelola Jabatan</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'shifts' ? 'active bg-gradient-primary' : '' }}"
+                        href="{{ route('shifts.index') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">access_time</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Kelola Shift</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'jeniscuti' ? 'active bg-gradient-primary' : '' }}"
+                        href="{{ route('jeniscuti.index') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">beach_access</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Kelola Jenis Cuti</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'bagians' ? 'active bg-gradient-primary' : '' }}"
+                        href="{{ route('bagian.index') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">business</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Kelola Departemen</span>
+                    </a>
+                </li>
             @endif
 
 

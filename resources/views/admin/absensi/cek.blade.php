@@ -58,7 +58,7 @@
                                             <th>Lembur</th>
                                             <th>Status</th>
                                             <th>Keterangan</th>
-                                            <th>Aksi</th>
+
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -73,11 +73,7 @@
                                                 <td>{{ $absensi->lembur }}</td>
                                                 <td>{{ $absensi->status }}</td>
                                                 <td>{{ $absensi->keterangan }}</td>
-                                                <td>
-                                                    <!-- Aksi (bisa diisi dengan tombol edit atau delete) -->
-                                                    <a href="#" class="btn btn-sm btn-warning">Edit</a>
-                                                    <a href="#" class="btn btn-sm btn-danger">Hapus</a>
-                                                </td>
+
                                             </tr>
                                         @empty
                                             <tr>

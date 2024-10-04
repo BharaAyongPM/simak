@@ -20,13 +20,13 @@ class SessionsController extends Controller
     public function store()
     {
         $attributes = request()->validate([
-            'email' => 'required',
+            'nik' => 'required',
             'password' => 'required'
         ]);
 
         if (! auth()->attempt($attributes)) {
             throw ValidationException::withMessages([
-                'email' => 'Your provided credentials could not be verified.'
+                'nik' => 'NIK atau Password anda salah'
             ]);
         }
 

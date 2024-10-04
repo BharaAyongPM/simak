@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bag;
+use App\Models\Jabatan;
+use App\Models\Shift;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -38,6 +40,13 @@ class KaryawanController extends Controller
                     // Cek apakah unit tersedia, jika tidak tampilkan '-'
                     return $karyawan->unit ? $karyawan->unt->unit : '-';
                 })
+                ->addColumn('jabatan_name', function ($karyawan) {
+                    // Tampilkan nama jabatan dari relasi jabatan
+                    return $karyawan->jabatan ? $karyawan->jabatan->nama : '-';
+                })
+                ->addColumn('bagian_name', function ($karyawan) {
+                    return $karyawan->bagian ? $karyawan->bagian->nama_bagian : '-';
+                })
                 ->addColumn('actions', function ($karyawan) {
                     // Tombol aksi untuk edit dan hapus
                     return view('karyawan.partials.actions', compact('karyawan'))->render();
@@ -47,10 +56,11 @@ class KaryawanController extends Controller
         }
 
         // Ambil semua data bagian dan unit untuk filter dropdown
+        $shifts = Shift::all();
         $bagians = Bag::all();
         $units = Unit::all();
-
-        return view('karyawan.index', compact('bagians', 'units'));
+        $jabatans = Jabatan::all();
+        return view('karyawan.index', compact('bagians', 'units', 'shifts', 'jabatans'));
     }
 
 
@@ -61,45 +71,57 @@ class KaryawanController extends Controller
     public function store(Request $request)
     {
         // Validasi input
+
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
-            'nik' => 'required|string|max:20',
-            'jabatan' => 'required|string|max:100',
+            'nik' => 'required|string|max:25',
+            'divisi' => 'required|integer',
+            'jabatan_id' => 'required|integer',
             'tgl_masuk' => 'required|date',
             'alamat' => 'required|string',
+            'status_kar' => 'required|string',
             'no_telp' => 'required|string|max:20',
-            'kelamin' => 'required|in:laki-laki,perempuan',
+            'kelamin' => 'required|in:Pria,Wanita',
             'agama' => 'required|string|max:50',
             'tgl_lahir' => 'required|date',
             'gaji' => 'required|numeric',
-            'shift' => 'required|string|max:50',
-            'unit' => 'required|string|max:100',
+            'shift' => 'required|integer',
+            'unit' => 'required|integer',
+            'email' => 'required|email|unique:users,email', // jika email digunakan
+            'password' => 'required|string|min:5', // jika password digunakan
         ]);
 
-        // Simpan karyawan baru ke tabel users
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'nik' => $request->nik,
-            'jabatan' => $request->jabatan,
-            'tgl_masuk' => $request->tgl_masuk,
-            'alamat' => $request->alamat,
-            'no_telp' => $request->no_telp,
-            'kelamin' => $request->kelamin,
-            'agama' => $request->agama,
-            'tgl_lahir' => $request->tgl_lahir,
-            'gaji' => $request->gaji,
-            'shift' => $request->shift,
-            'unit' => $request->unit,
-            'level' => 'karyawan',
-            'aktif' => 1, // Set karyawan sebagai aktif
-        ]);
+        try {
+            // Simpan karyawan baru ke tabel users
+            User::create([
+                'name' => $request->name,
+                'nik' => $request->nik,
+                'divisi' => $request->divisi,
+                'jabatan_id' => $request->jabatan_id,
+                'tgl_masuk' => $request->tgl_masuk,
+                'alamat' => $request->alamat,
+                'no_telp' => $request->no_telp,
+                'kelamin' => $request->kelamin,
+                'agama' => $request->agama,
+                'tgl_lahir' => $request->tgl_lahir,
+                'gaji' => $request->gaji,
+                'shift' => $request->shift,
+                'unit' => $request->unit,
+                'status_kar' => $request->status_kar,
+                'foto' => 'default.png',
+                'aktif' => 1, // Set karyawan sebagai aktif
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
 
-        return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil ditambahkan.');
+            // Kirim pesan sukses jika berhasil
+            return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            // Kirim pesan error jika terjadi kesalahan
+            return redirect()->route('karyawan.index')->with('error', 'Terjadi kesalahan saat menambahkan karyawan. Pastikan Data yang dimasukan benar' . $e->getMessage());
+        }
     }
+
 
     // Mengupdate data karyawan yang sudah ada (update)
     public function update(Request $request, User $user)
@@ -109,16 +131,18 @@ class KaryawanController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'nik' => 'required|string|max:20',
-            'jabatan' => 'required|string|max:100',
+            'jabatan_id' => 'required|string|max:100',
+            'bagian' => 'required|integer',
             'tgl_masuk' => 'required|date',
             'alamat' => 'required|string',
             'no_telp' => 'required|string|max:20',
-            'kelamin' => 'required|in:laki-laki,perempuan',
+            'kelamin' => 'required|in:Pria,Wanita',
             'agama' => 'required|string|max:50',
             'tgl_lahir' => 'required|date',
             'gaji' => 'required|numeric',
-            'shift' => 'required|string|max:50',
+            'status_kar' => 'required|string',
             'unit' => 'required|string|max:100',
+            'password' => 'required|string|min:5', // jika password digunakan
         ]);
 
         // Update data karyawan
@@ -126,7 +150,7 @@ class KaryawanController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'nik' => $request->nik,
-            'jabatan' => $request->jabatan,
+            'jabatan_id' => $request->jabatan_id,
             'tgl_masuk' => $request->tgl_masuk,
             'alamat' => $request->alamat,
             'no_telp' => $request->no_telp,
@@ -134,8 +158,10 @@ class KaryawanController extends Controller
             'agama' => $request->agama,
             'tgl_lahir' => $request->tgl_lahir,
             'gaji' => $request->gaji,
-            'shift' => $request->shift,
+            'status_kar' => $request->status_kar,
+            'password' => Hash::make($request->password),
             'unit' => $request->unit,
+            'divisi' => $request->bagian,
         ]);
 
         return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil diupdate.');

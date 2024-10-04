@@ -2,13 +2,17 @@
     <!-- Tombol Edit -->
     <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editKaryawanModal"
         data-id="{{ $karyawan->id }}" data-name="{{ $karyawan->name }}" data-nik="{{ $karyawan->nik }}"
-        data-jabatan="{{ $karyawan->jabatan }}" data-tgl_masuk="{{ $karyawan->tgl_masuk }}"
+        data-jabatan="{{ $karyawan->jabatan_id }}" data-tgl_masuk="{{ $karyawan->tgl_masuk }}"
         data-alamat="{{ $karyawan->alamat }}" data-no_telp="{{ $karyawan->no_telp }}"
         data-status_kar="{{ $karyawan->status_kar }}" data-kelamin="{{ $karyawan->kelamin }}"
         data-agama="{{ $karyawan->agama }}" data-tgl_lahir="{{ $karyawan->tgl_lahir }}"
-        data-gaji="{{ $karyawan->gaji }}" data-shift="{{ $karyawan->shift }}" data-unit="{{ $karyawan->unit }}">
+        data-gaji="{{ $karyawan->gaji }}" data-shift="{{ $karyawan->shift }}" data-unit="{{ $karyawan->unit }}"
+        data-bagian="{{ $karyawan->bagian ? $karyawan->bagian->id_bagian : '' }}"data-email="{{ $karyawan->email }}"
+        data-password="{{ $karyawan->password }}">
+
         <i class="fas fa-edit"></i> Edit
     </button>
+
 
     <!-- Tombol Hapus -->
     <form action="{{ route('karyawan.destroy', $karyawan->id) }}" method="POST" style="display:inline;">
