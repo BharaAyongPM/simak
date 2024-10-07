@@ -98,12 +98,22 @@ class IzinController extends Controller
         $user = auth()->user();
 
         // Mengambil data izin dari karyawan yang berada di unit yang sama dengan Kepala Unit
-        $izinKaryawan = Izin::with('user')
+        // Daftar izin yang belum di-approve (pending)
+        $izinPending = Izin::with('user')
             ->whereHas('user', function ($query) use ($user) {
                 $query->where('unit', $user->unit); // Ambil karyawan yang unit-nya sama dengan kepala unit
             })
+            ->where('approve_1', 0) // Hanya yang belum diapprove oleh approve 1
             ->get();
 
-        return view('izin.izinkaryawan', compact('izinKaryawan'));
+        // Daftar izin yang sudah di-approve (histori)
+        $izinApproved = Izin::with('user')
+            ->whereHas('user', function ($query) use ($user) {
+                $query->where('unit', $user->unit); // Ambil karyawan yang unit-nya sama dengan kepala unit
+            })
+            ->where('approve_1', 1) // Yang sudah di-approve oleh approve 1
+            ->get();
+
+        return view('izin.izinkaryawan', compact('izinPending', 'izinApproved'));
     }
 }

@@ -72,11 +72,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/kalender-kerja-karyawan', [KalenderKerjaController::class, 'indexKaryawan'])->name('kalender-kerja.karyawan.index');
     //template kalender kerja
     Route::get('/kalender-kerja/download-template', [KalenderKerjaController::class, 'downloadTemplate'])->name('kalender_kerja.download_template');
-    //Aproval
+    //Aproval izin
     Route::post('/approve1/{id}', [ApprovalController::class, 'approve1'])->name('approve1');
-    // Rute untuk approve 2 (untuk HRD)
-    Route::post('/approve2/{id}', [ApprovalController::class, 'approve2'])->name('approve2');
     Route::get('/dataizin', [IzinController::class, 'dataizin'])->name('dataizin');
+    Route::get('/hrd/approval2', [ApprovalController::class, 'approve2Index'])->name('hrd.approval2.index');
+    Route::post('/hrd/approval2/{id}', [ApprovalController::class, 'approve2'])->name('hrd.approval2.approve');
+    //Aproval Lembur
+    Route::post('/lembur/approve1/{id}', [ApprovalController::class, 'approveLembur1'])->name('lembur.approval1');
+    Route::post('/lembur/approve2/{id}', [ApprovalController::class, 'approveLembur2'])->name('lembur.approval2');
+    Route::get('/lembur/approval1', [ApprovalController::class, 'viewLemburKepalaUnit'])->name('lembur.view.kepalaunit');
+    Route::get('/lembur/approval2', [ApprovalController::class, 'viewLemburHRD'])->name('lembur.view.hrd');
     // Route::get('/form-izin', [CutilemburController::class, 'index'])->name('cutilembur.index');
     // Route::post('/form-izin', [CutilemburController::class, 'store'])->name('cutilembur.store');
     // Route::get('/form-izin/{id}/edit', [CutilemburController::class, 'edit'])->name('cutilembur.edit');

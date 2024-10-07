@@ -209,6 +209,50 @@
                     <span class="nav-link-text ms-1">Absensi</span>
                 </a>
             </li>
+            @if (Auth::user()->hasRole('KEPALA UNIT') || Auth::user()->hasRole('KEPALA BAGIAN') || Auth::user()->hasRole('DIREKTUR'))
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'dataizin' ? ' active bg-gradient-primary' : '' }} "
+                        href="{{ route('dataizin') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">event_note</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Data Izin Karyawan</span>
+                    </a>
+                </li>
+            @endif
+            @if (Auth::user()->hasRole('HRD'))
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'dapproval2' ? ' active bg-gradient-primary' : '' }} "
+                        href="{{ route('hrd.approval2.index') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">event_note</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Data Izin Karyawan 2</span>
+                    </a>
+                </li>
+            @endif
+            @if (Auth::user()->hasRole('KEPALA UNIT') || Auth::user()->hasRole('KEPALA BAGIAN') || Auth::user()->hasRole('DIREKTUR'))
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'approval1-lembur' ? ' active bg-gradient-primary' : '' }} "
+                        href="{{ route('lembur.view.kepalaunit') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">event_note</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Data Lembur Karyawan</span>
+                    </a>
+                </li>
+            @endif
+            @if (Auth::user()->hasRole('HRD'))
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'approval2' ? ' active bg-gradient-primary' : '' }} "
+                        href="{{ route('lembur.view.hrd') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">event_note</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Data Lembur Karyawan 2</span>
+                    </a>
+                </li>
+            @endif
             <li class="nav-item">
                 <a class="nav-link text-white {{ $activePage == 'form' ? ' active bg-gradient-primary' : '' }}"
                     data-bs-toggle="collapse" href="#submenuForm2" aria-expanded="false">
