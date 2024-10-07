@@ -1,76 +1,124 @@
-<x-layout bodyClass="g-sidenav-show  bg-gray-200">
+<x-layout bodyClass="g-sidenav-show bg-gray-200">
     <x-navbars.sidebar activePage="profile"></x-navbars.sidebar>
-    <div class="main-content position-relative bg-gray-100 max-height-vh-100 h-100">
-        <!-- Navbar -->
-        <x-navbars.navs.auth titlePage='Profile'></x-navbars.navs.auth>
-        <!-- End Navbar -->
-        <div class="container-fluid px-2 px-md-4">
-            <div class="page-header min-height-300 border-radius-xl mt-4"
-                style="background-image: url('{{ asset('assets/img/logos/logorsip.png') }}');" <span
-                class="mask  bg-gradient-primary  opacity-6"></span>
-            </div>
-            <div class="card card-body mx-3 mx-md-4 mt-n6">
-                <div class="row gx-4 mb-2">
-                    <div class="col-auto">
-                        <div class="avatar avatar-xl position-relative">
-                            <img src="{{ asset('foto.jpg') }}" alt="profile_image"
-                                class="w-100 border-radius-lg shadow-sm">
-                        </div>
-                    </div>
-                    <div class="col-auto my-auto">
-                        <div class="h-100">
-                            <h5 class="mb-1">
-                                {{ $user->name }}
-                            </h5>
-                            <p class="mb-0 font-weight-normal text-sm">
-                                {{ $user->email }}
-                            </p>
+    <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+        <x-navbars.navs.auth titlePage="Profil Karyawan"></x-navbars.navs.auth>
+        <div class="container-fluid py-4">
+            <div class="row">
+                <div class="col-xl-4 col-lg-5 col-md-6 mb-4">
+                    <div class="card card-profile shadow-lg">
+                        <div class="card-body text-center">
+                            <!-- Foto Profil -->
+                            {{-- @if ($user->foto)
+                                <img src="{{ asset('storage/' . $user->foto) }}" class="rounded-circle img-fluid"
+                                    style="width: 150px; height: 150px;" alt="Foto Profil">
+                            @else --}}
+                            <img src="{{ asset('foto.jpg') }}" class="rounded-circle img-fluid" alt="Foto Default">
+
+                            {{-- @endif --}}
+                            <h5 class="mt-3">{{ $user->name }}</h5>
+                            <p class="text-muted">{{ $user->jabatan->nama ?? 'Tidak ada jabatan' }}</p>
+
+                            <div class="d-flex flex-column align-items-center">
+                                <p class="mb-0"><strong>Email:</strong> {{ $user->email }}</p>
+                                <p><strong>Telepon:</strong> {{ $user->no_telp }}</p>
+                            </div>
+
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-12 col-xl-4">
-                        <div class="card card-plain h-100">
-                            <div class="card-header pb-0 p-3">
-                                <h6 class="mb-0">Profile Information</h6>
+                <!-- Detail Profil -->
+                <div class="col-xl-8 col-lg-7 col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h6 class="mb-0">Detail Profil Karyawan</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nama Lengkap</label>
+                                    <input type="text" class="form-control" value="{{ $user->name }}" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">NIK</label>
+                                    <input type="text" class="form-control" value="{{ $user->nik }}" readonly>
+                                </div>
                             </div>
-                            <div class="card-body p-3">
-                                <ul class="list-group">
-                                    <li class="list-group-item border-0 ps-0 text-sm">
-                                        <strong class="text-dark">Full Name:</strong> &nbsp; {{ $user->name }}
-                                    </li>
-                                    <li class="list-group-item border-0 ps-0 text-sm">
-                                        <strong class="text-dark">Email:</strong> &nbsp; {{ $user->email }}
-                                    </li>
-                                    <li class="list-group-item border-0 ps-0 text-sm">
-                                        <strong class="text-dark">Status:</strong> &nbsp;
-                                        @if ($user->aktif)
-                                            Aktif
-                                        @else
-                                            Non-Aktif
-                                        @endif
-                                    </li>
-                                    <li class="list-group-item border-0 ps-0 text-sm">
-                                        <strong class="text-dark">Level:</strong> &nbsp;
-                                        {{ $user->lv->nama ?? 'N/A' }}
-                                    </li>
-                                    <li class="list-group-item border-0 ps-0 text-sm">
-                                        <strong class="text-dark">Divisi:</strong> &nbsp;
-                                        {{ $user->bag->nama_bagian ?? 'N/A' }}
-                                    </li>
-                                    <li class="list-group-item border-0 ps-0 text-sm">
-                                        <strong class="text-dark">Unit:</strong> &nbsp;
-                                        {{ $user->unt->unit ?? 'N/A' }}
-                                    </li>
-                                </ul>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" value="{{ $user->email }}" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Nomor Telepon</label>
+                                    <input type="text" class="form-control" value="{{ $user->no_telp }}" readonly>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Divisi</label>
+                                    <input type="text" class="form-control"
+                                        value="{{ $user->bag->nama_bagian ?? '-' }}" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Unit</label>
+                                    <input type="text" class="form-control" value="{{ $user->unt->unit ?? '-' }}"
+                                        readonly>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Jabatan</label>
+                                    <input type="text" class="form-control"
+                                        value="{{ $user->jabatan->nama ?? '-' }}" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Status Karyawan</label>
+                                    <input type="text" class="form-control" value="{{ $user->status_kar }}"
+                                        readonly>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Agama</label>
+                                    <input type="text" class="form-control" value="{{ $user->agama }}" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Jenis Kelamin</label>
+                                    <input type="text" class="form-control" value="{{ ucfirst($user->kelamin) }}"
+                                        readonly>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Tanggal Lahir</label>
+                                    <input type="text" class="form-control"
+                                        value="{{ \Carbon\Carbon::parse($user->tgl_lahir)->format('d M Y') }}"
+                                        readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tanggal Masuk</label>
+                                    <input type="text" class="form-control"
+                                        value="{{ \Carbon\Carbon::parse($user->tgl_masuk)->format('d M Y') }}"
+                                        readonly>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="form-label">Alamat</label>
+                                    <textarea class="form-control" rows="2" readonly>{{ $user->alamat }}</textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <x-footers.auth></x-footers.auth>
-    </div>
-    <x-plugins></x-plugins>
+    </main>
 </x-layout>

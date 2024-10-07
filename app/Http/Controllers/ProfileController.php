@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class ProfileController extends Controller
 {
     // Menampilkan detail profil
-    public function create()
+    public function profil()
     {
         // Mengambil user yang sedang login dan memuat relasi 'divisi'
         $user = User::with('bag', 'lv', 'unt')->find(auth()->id());

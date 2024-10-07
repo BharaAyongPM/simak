@@ -2,20 +2,26 @@
 
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\BagianController;
 use App\Http\Controllers\CutiController;
 use App\Http\Controllers\CutilemburController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DatastockcutiController;
+use App\Http\Controllers\InformasiController;
 use App\Http\Controllers\IzinController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\JeniscutiController;
 use App\Http\Controllers\KalenderKerjaController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\LemburController;
+use App\Http\Controllers\LiburController;
+use App\Http\Controllers\PeraturanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SessionsController;
 use App\Http\Controllers\ShiftController;
+use App\Http\Controllers\UnitController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -49,14 +55,28 @@ Route::middleware('auth')->group(function () {
     Route::get('/pelatihan', [DashboardController::class, 'pelatihan'])->name('pelatihan');
     Route::get('/historydepo', [DashboardController::class, 'historydepo'])->name('history-deposit');
     Route::get('/rekappelatihan', [DashboardController::class, 'rekappelatihan'])->name('rekap-pelatihan');
-    Route::get('/profile', [ProfileController::class, 'create'])->name('user-profile');
+    Route::get('/profile', [ProfileController::class, 'profil'])->name('user-profile');
 
     //ABSENSi
     Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi');
     Route::post('/absensi/masuk', [AbsensiController::class, 'absenMasuk'])->name('absensi.masuk');
     Route::post('/absensi/pulang', [AbsensiController::class, 'absenPulang'])->name('absensi.pulang');
-
+    //Peraturan
+    Route::get('/lihatperaturan', [PeraturanController::class, 'viewperaturan'])->name('peraturan.view');
+    //Informasi
+    Route::get('/informasi-karyawan', [InformasiController::class, 'indexKaryawan'])->name('informasi.karyawan.index');
+    //Hari Libur
+    Route::get('/hari-libur-karyawan', [LiburController::class, 'indexKaryawan'])->name('libur.karyawan.index');
     //Cutilembur
+    //Kalender Kerja
+    Route::get('/kalender-kerja-karyawan', [KalenderKerjaController::class, 'indexKaryawan'])->name('kalender-kerja.karyawan.index');
+    //template kalender kerja
+    Route::get('/kalender-kerja/download-template', [KalenderKerjaController::class, 'downloadTemplate'])->name('kalender_kerja.download_template');
+    //Aproval
+    Route::post('/approve1/{id}', [ApprovalController::class, 'approve1'])->name('approve1');
+    // Rute untuk approve 2 (untuk HRD)
+    Route::post('/approve2/{id}', [ApprovalController::class, 'approve2'])->name('approve2');
+    Route::get('/dataizin', [IzinController::class, 'dataizin'])->name('dataizin');
     // Route::get('/form-izin', [CutilemburController::class, 'index'])->name('cutilembur.index');
     // Route::post('/form-izin', [CutilemburController::class, 'store'])->name('cutilembur.store');
     // Route::get('/form-izin/{id}/edit', [CutilemburController::class, 'edit'])->name('cutilembur.edit');
@@ -142,5 +162,37 @@ Route::group(['middleware' => ['auth', 'role:ADMIN|HRD']], function () {
     Route::get('/bagian/edit/{id}', [BagianController::class, 'edit'])->name('bagian.edit');
     Route::put('/bagian/update/{id}', [BagianController::class, 'update'])->name('bagian.update');
     Route::delete('/bagian/{id}', [BagianController::class, 'destroy'])->name('bagian.destroy');
+    //Unit
+    Route::get('/unit', [UnitController::class, 'index'])->name('unit.index');
+    Route::post('/unit', [UnitController::class, 'store'])->name('unit.store');
+    Route::get('/unit/edit/{id}', [UnitController::class, 'edit'])->name('unit.edit');
+    Route::put('/unit/update/{id}', [UnitController::class, 'update'])->name('unit.update');
+    Route::delete('/unit/{id}', [UnitController::class, 'destroy'])->name('unit.destroy');
+    //Libur
+    Route::get('/libur', [LiburController::class, 'index'])->name('libur.index');
+    Route::post('/libur', [LiburController::class, 'store'])->name('libur.store');
+    Route::put('/libur/{id}', [LiburController::class, 'update'])->name('libur.update');
+    Route::delete('/libur/{id}', [LiburController::class, 'destroy'])->name('libur.destroy');
+    Route::get('/libur/fetch-api', [LiburController::class, 'fetchLiburFromApi'])->name('libur.fetch');
+    Route::get('/libur/edit/{id}', [LiburController::class, 'edit'])->name('libur.edit');
+    //Stock Cuti
+    Route::get('/datastockcuti', [DatastockcutiController::class, 'index'])->name('datastockcuti.index');
+    Route::post('/datastockcuti', [DatastockcutiController::class, 'store'])->name('datastockcuti.store');
+    Route::put('/datastockcuti/{id}', [DatastockcutiController::class, 'update'])->name('datastockcuti.update');
+    Route::delete('/datastockcuti/{id}', [DatastockcutiController::class, 'destroy'])->name('datastockcuti.destroy');
+    Route::post('/datastockcuti/storeForAll', [DatastockcutiController::class, 'storeForAll'])->name('datastockcuti.storeForAll');
+    Route::get('/datastockcuti/edit/{id}', [DatastockcutiController::class, 'edit'])->name('datastockcuti.edit');
+    //Peraturan
+    Route::get('/peraturan', [PeraturanController::class, 'index'])->name('peraturan.index');
+    Route::post('/peraturan', [PeraturanController::class, 'store'])->name('peraturan.store');
+    Route::put('/peraturan/{id}', [PeraturanController::class, 'update'])->name('peraturan.update');
+    Route::delete('/peraturan/{id}', [PeraturanController::class, 'destroy'])->name('peraturan.destroy');
+    Route::get('/peraturan/edit/{id}', [PeraturanController::class, 'edit'])->name('peraturan.edit');
+    //Informasi
+    Route::get('/informasi', [InformasiController::class, 'index'])->name('informasi.index');
+    Route::post('/informasi', [InformasiController::class, 'store'])->name('informasi.store');
+    Route::put('/informasi/{id}', [InformasiController::class, 'update'])->name('informasi.update');
+    Route::delete('/informasi/{id}', [InformasiController::class, 'destroy'])->name('informasi.destroy');
+    Route::get('/informasi/edit/{id}', [InformasiController::class, 'edit'])->name('informasi.edit');
 });
 Route::get('/get-units-by-bagian/{bagian_id}', [AdminController::class, 'getUnitsByBagian'])->name('get.units.by.bagian');

@@ -14,9 +14,9 @@ class Unit extends Model
         'bagian',
         'unit'
     ];
-    public function bagian()
+    public function bag()
     {
-        return $this->belongsTo(Bag::class, 'bagian_id'); // 'bagian_id' adalah foreign key di tabel 'units'
+        return $this->belongsTo(Bag::class, 'bagian', 'id_bagian'); // Foreign key adalah 'bagian' di tabel units dan primary key adalah 'id_bagian' di tabel bags
     }
     public function users()
     {

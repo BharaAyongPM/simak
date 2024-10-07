@@ -13,6 +13,20 @@ class CutiController extends Controller
     // Tampilkan daftar cuti
     public function index()
     {
+        // Ambil data user yang sedang login
+        $user = Auth::user();
+
+        // Cek apakah tanggal masuk ada dan hitung selisih dengan hari ini
+        $tanggalMasuk = $user->tanggal_masuk;
+        $satuTahunKerja = \Carbon\Carbon::parse($tanggalMasuk)->addYear(1);
+        $hariIni = \Carbon\Carbon::now();
+
+        // Jika belum mencapai satu tahun
+        if ($hariIni->lessThan($satuTahunKerja)) {
+            // Redirect ke halaman absensi dengan pesan error
+            return redirect('/absensi')->with('error', 'Anda belum satu tahun bekerja dan belum bisa mengakses form cuti.');
+        }
+
         // Ambil data cuti yang diajukan oleh user yang sedang login
         $cuti = Cuti::with('jenisCuti', 'user')->where('user_id', Auth::id())->get();
 

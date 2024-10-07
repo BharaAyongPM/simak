@@ -13,6 +13,7 @@
                                 <small>Divisi: {{ Auth::user()->bag->nama_bagian ?? 'Tidak ada data' }} | Unit:
                                     {{ Auth::user()->unt->unit ?? 'Tidak ada data' }}</small>
                             </div>
+
                             <form method="GET" action="{{ route('kalender_kerja.index') }}" class="d-flex">
                                 <div class="input-group">
                                     <input type="date" name="tanggal_awal" class="form-control"
@@ -99,6 +100,11 @@
                                 <input type="hidden" name="tanggal_awal" value="{{ $tanggalAwal }}">
                                 <input type="hidden" name="tanggal_akhir" value="{{ $tanggalAkhir }}">
                                 <button type="submit" class="btn btn-success">Upload Kalender Kerja</button>
+                            </form>
+                            <form method="GET" action="{{ route('kalender_kerja.download_template') }}">
+                                <input type="hidden" name="tanggal_awal" value="{{ $tanggalAwal }}">
+                                <input type="hidden" name="tanggal_akhir" value="{{ $tanggalAkhir }}">
+                                <button type="submit" class="btn btn-primary">Download Template Excel</button>
                             </form>
                         </div>
                     </div>

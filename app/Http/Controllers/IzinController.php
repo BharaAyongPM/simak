@@ -92,4 +92,18 @@ class IzinController extends Controller
 
         return redirect()->back()->with('success', 'Pengajuan Izin berhasil dihapus.');
     }
+    public function dataizin()
+    {
+        // Mendapatkan user yang sedang login (Kepala Unit)
+        $user = auth()->user();
+
+        // Mengambil data izin dari karyawan yang berada di unit yang sama dengan Kepala Unit
+        $izinKaryawan = Izin::with('user')
+            ->whereHas('user', function ($query) use ($user) {
+                $query->where('unit', $user->unit); // Ambil karyawan yang unit-nya sama dengan kepala unit
+            })
+            ->get();
+
+        return view('izin.izinkaryawan', compact('izinKaryawan'));
+    }
 }

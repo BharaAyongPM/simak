@@ -3,7 +3,22 @@
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
         <!-- Navbar -->
         <x-navbars.navs.auth titlePage="Form Cuti"></x-navbars.navs.auth>
-        <!-- End Navbar -->
+
+
+        @if (session('error'))
+            <script>
+                Swal.fire({
+                    title: 'Peringatan!',
+                    text: "{{ session('error') }}",
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/absensi'; // Redirect ke absensi
+                    }
+                });
+            </script>
+        @endif
         <div class="container-fluid py-4">
             <div class="row">
                 <div class="col-xl-12 mb-4">

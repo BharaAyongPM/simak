@@ -142,4 +142,83 @@ class KalenderKerjaController extends Controller
 
         return response()->json(['message' => 'Shift berhasil diubah']);
     }
+    public function indexKaryawan(Request $request)
+    {
+        // Mendapatkan user yang sedang login
+        $user = auth()->user();
+        Carbon::setLocale('id');  // Set locale ke Indonesia
+        // Mendapatkan filter tanggal dari request atau menggunakan tanggal bulan ini
+        $tanggalAwal = $request->input('tanggal_awal', Carbon::now()->startOfMonth()->toDateString());
+        $tanggalAkhir = $request->input('tanggal_akhir', Carbon::now()->endOfMonth()->toDateString());
+
+        // Mengambil data kalender kerja berdasarkan filter tanggal hanya untuk user yang sedang login
+        $kalenderKerja = KalenderKerja::where('karyawan', $user->id)
+            ->whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir])
+            ->get();
+
+        // Mengambil daftar shift yang tersedia untuk menampilkan shift terkait
+        $shifts = \App\Models\Shift::all();
+
+        // Mengembalikan view dengan data kalender kerja
+        return view('kalender_kerja.karyawan', compact('kalenderKerja', 'tanggalAwal', 'tanggalAkhir', 'shifts'));
+    }
+    public function downloadTemplate(Request $request)
+    {
+        // Mendapatkan user yang sedang login
+        $user = auth()->user();
+
+        // Mendapatkan filter tanggal dari request atau menggunakan tanggal bulan ini
+        $tanggalAwal = $request->input('tanggal_awal', Carbon::now()->startOfMonth()->toDateString());
+        $tanggalAkhir = $request->input('tanggal_akhir', Carbon::now()->endOfMonth()->toDateString());
+
+        // Mengambil semua karyawan di unit yang sama dengan user yang sedang login
+        $karyawanDivisi = \App\Models\User::where('unit', $user->unit)->get();
+
+        // Buat template Excel
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Menentukan header tabel: ID, Nama, dan Tanggal (berdasarkan filter tanggal)
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'ID');
+        $sheet->setCellValue('C1', 'Nama');
+
+        // Generate tanggal secara dinamis berdasarkan filter
+        $currentDate = Carbon::parse($tanggalAwal);
+        $endDate = Carbon::parse($tanggalAkhir);
+        $columnIndex = 'D';  // Kolom pertama untuk tanggal
+        while ($currentDate <= $endDate) {
+            $sheet->setCellValue($columnIndex . '1', 'tanggal_' . $currentDate->format('d'));
+            $currentDate->addDay();
+            $columnIndex++;
+        }
+
+        // Mengisi data karyawan
+        $row = 2;  // Mulai dari baris kedua
+        foreach ($karyawanDivisi as $index => $karyawan) {
+            $sheet->setCellValue('A' . $row, $index + 1);
+            $sheet->setCellValue('B' . $row, $karyawan->id);
+            $sheet->setCellValue('C' . $row, $karyawan->name);
+
+            // Tanggal diisi kosong untuk diisi oleh user nanti
+            $currentDate = Carbon::parse($tanggalAwal);
+            $columnIndex = 'D';  // Kolom pertama untuk tanggal
+            while ($currentDate <= $endDate) {
+                $sheet->setCellValue($columnIndex . $row, '');  // Kosongkan kolom shift
+                $currentDate->addDay();
+                $columnIndex++;
+            }
+            $row++;
+        }
+
+        // Simpan ke file Excel
+        $fileName = 'template_kalender_kerja_' . $user->unit . '.xlsx';
+        $filePath = storage_path('app/public/' . $fileName);
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save($filePath);
+
+        // Download file
+        return response()->download($filePath);
+    }
 }

@@ -1,9 +1,10 @@
 <x-layout bodyClass="g-sidenav-show bg-gray-200">
-    <x-navbars.sidebar activePage='dashboard'></x-navbars.sidebar>
+    <x-navbars.sidebar activePage='absensi'></x-navbars.sidebar>
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
         <!-- Navbar -->
         <x-navbars.navs.auth titlePage="Log Absen"></x-navbars.navs.auth>
         <!-- End Navbar -->
+
         <div class="container-fluid py-4">
             <div class="row">
                 <div class="col-xl-12 mb-4">
@@ -161,6 +162,7 @@
     <x-plugins></x-plugins>
 
     @push('js')
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             let video = document.getElementById('video');
             let canvas = document.getElementById('canvas');
@@ -348,6 +350,20 @@
                 });
             });
         </script>
+        @if (session('error'))
+            <script>
+                Swal.fire({
+                    title: 'Peringatan!',
+                    text: "{{ session('error') }}",
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/absensi'; // Redirect ke absensi
+                    }
+                });
+            </script>
+        @endif
     @endpush
 
 
