@@ -106,14 +106,14 @@ class IzinController extends Controller
             ->where('approve_1', 0) // Hanya yang belum diapprove oleh approve 1
             ->get();
 
-        // Daftar izin yang sudah di-approve (histori)
-        $izinApproved = Izin::with('user')
+        // Daftar izin yang sudah di-approve (approved) atau ditolak (rejected) (histori)
+        $izinApprovedOrRejected = Izin::with(['user', 'approvedBy1']) // Tambahkan approvedBy1 untuk eager loading
             ->whereHas('user', function ($query) use ($user) {
                 $query->where('unit', $user->unit); // Ambil karyawan yang unit-nya sama dengan kepala unit
             })
-            ->where('approve_1', 1) // Yang sudah di-approve oleh approve 1
+            ->whereIn('approve_1', [1, -1]) // Yang sudah diapprove atau ditolak oleh approve 1
             ->get();
 
-        return view('izin.izinkaryawan', compact('izinPending', 'izinApproved'));
+        return view('izin.izinkaryawan', compact('izinPending', 'izinApprovedOrRejected'));
     }
 }

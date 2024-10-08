@@ -65,6 +65,15 @@
                                                                     <button type="submit"
                                                                         class="btn btn-success btn-sm">Approve</button>
                                                                 </form>
+
+                                                                <!-- Form untuk menolak lembur -->
+                                                                <form action="{{ route('lembur.reject1', $item->id) }}"
+                                                                    method="POST" style="margin-top: 5px;">
+                                                                    @csrf
+                                                                    <textarea name="keterangan1" class="form-control mb-2" placeholder="Alasan Penolakan" required></textarea>
+                                                                    <button type="submit"
+                                                                        class="btn btn-danger btn-sm">Reject</button>
+                                                                </form>
                                                             </td>
                                                         </tr>
                                                     @endforeach
@@ -100,6 +109,7 @@
                                                         <th>Jam Mulai</th>
                                                         <th>Jam Selesai</th>
                                                         <th>Keterangan Lembur</th>
+                                                        <th>Status Approve 1</th>
                                                         <th>Keterangan Approve 1</th>
                                                     </tr>
                                                 </thead>
@@ -113,6 +123,13 @@
                                                             <td>{{ $item->jam_mulai }}</td>
                                                             <td>{{ $item->jam_selesai }}</td>
                                                             <td>{{ $item->keterangan }}</td>
+                                                            <td>
+                                                                @if ($item->approve_1 == 1)
+                                                                    <span class="badge bg-success">Approved</span>
+                                                                @elseif ($item->approve_1 == -1)
+                                                                    <span class="badge bg-danger">Rejected</span>
+                                                                @endif
+                                                            </td>
                                                             <td>{{ $item->keterangan1 }}</td>
                                                         </tr>
                                                     @endforeach

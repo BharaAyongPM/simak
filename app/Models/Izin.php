@@ -31,4 +31,8 @@ class Izin extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'id');  // Relasi izin dengan user
     }
+    public function approvedBy1()
+    {
+        return $this->belongsTo(User::class, 'approved_by_1');
+    }
 }

@@ -222,7 +222,7 @@
             @endif
             @if (Auth::user()->hasRole('HRD'))
                 <li class="nav-item">
-                    <a class="nav-link text-white {{ $activePage == 'dapproval2' ? ' active bg-gradient-primary' : '' }} "
+                    <a class="nav-link text-white {{ $activePage == 'hrdizin' ? ' active bg-gradient-primary' : '' }} "
                         href="{{ route('hrd.approval2.index') }}">
                         <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="material-icons opacity-10">event_note</i>
@@ -250,6 +250,28 @@
                             <i class="material-icons opacity-10">event_note</i>
                         </div>
                         <span class="nav-link-text ms-1">Data Lembur Karyawan 2</span>
+                    </a>
+                </li>
+            @endif
+            @if (Auth::user()->hasRole('KEPALA UNIT') || Auth::user()->hasRole('KEPALA BAGIAN') || Auth::user()->hasRole('DIREKTUR'))
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'approval1-cuti' ? ' active bg-gradient-primary' : '' }} "
+                        href="{{ route('unit.cuti') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">event_note</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Data Cuti Karyawan</span>
+                    </a>
+                </li>
+            @endif
+            @if (Auth::user()->hasRole('HRD'))
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'approval2-cuti' ? ' active bg-gradient-primary' : '' }} "
+                        href="{{ route('hrd.cuti') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">event_note</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Data Cuti Karyawan 2</span>
                     </a>
                 </li>
             @endif

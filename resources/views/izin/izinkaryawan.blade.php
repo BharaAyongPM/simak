@@ -70,6 +70,14 @@
                                                                     <button type="submit"
                                                                         class="btn btn-success btn-sm">Approve</button>
                                                                 </form>
+                                                                <form
+                                                                    action="{{ route('unit.approval1.rejectizin', $izin->id) }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    <textarea name="keterangan1" class="form-control mb-2" placeholder="Alasan Penolakan" required></textarea>
+                                                                    <button type="submit"
+                                                                        class="btn btn-danger btn-sm">Reject</button>
+                                                                </form>
                                                             </td>
                                                         </tr>
                                                     @endforeach
@@ -82,8 +90,8 @@
                                 <!-- Histori Izin -->
                                 <div class="tab-pane fade" id="approved" role="tabpanel"
                                     aria-labelledby="approved-tab">
-                                    @if ($izinApproved->isEmpty())
-                                        <p class="text-center">Tidak ada histori izin yang di-approve.</p>
+                                    @if ($izinApprovedOrRejected->isEmpty())
+                                        <p class="text-center">Tidak ada histori izin yang di-approve atau ditolak.</p>
                                     @else
                                         <div class="table-responsive p-4">
                                             <table class="table align-items-center table-hover table-bordered mb-0">
@@ -97,10 +105,12 @@
                                                         <th>Tanggal Selesai</th>
                                                         <th>Keterangan</th>
                                                         <th>Status Approve 1</th>
+                                                        <th>Keterangan Approve/Reject</th>
+                                                        <th>Disetujui/Ditolak Oleh</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @foreach ($izinApproved as $index => $izin)
+                                                    @foreach ($izinApprovedOrRejected as $index => $izin)
                                                         <tr>
                                                             <td>{{ $index + 1 }}</td>
                                                             <td>{{ $izin->user->name }}</td>
@@ -113,8 +123,14 @@
                                                             </td>
                                                             <td>{{ $izin->keterangan }}</td>
                                                             <td>
-                                                                <span class="badge bg-success">Approved</span>
+                                                                @if ($izin->approve_1 == 1)
+                                                                    <span class="badge bg-success">Approved</span>
+                                                                @elseif ($izin->approve_1 == -1)
+                                                                    <span class="badge bg-danger">Rejected</span>
+                                                                @endif
                                                             </td>
+                                                            <td>{{ $izin->keterangan1 }}</td>
+                                                            <td>{{ $izin->approvedBy1->name ?? 'N/A' }}</td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>

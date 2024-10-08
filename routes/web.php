@@ -74,14 +74,25 @@ Route::middleware('auth')->group(function () {
     Route::get('/kalender-kerja/download-template', [KalenderKerjaController::class, 'downloadTemplate'])->name('kalender_kerja.download_template');
     //Aproval izin
     Route::post('/approve1/{id}', [ApprovalController::class, 'approve1'])->name('approve1');
+    Route::post('/izin/reject1/{id}', [ApprovalController::class, 'reject1'])->name('unit.approval1.rejectizin');
     Route::get('/dataizin', [IzinController::class, 'dataizin'])->name('dataizin');
     Route::get('/hrd/approval2', [ApprovalController::class, 'approve2Index'])->name('hrd.approval2.index');
     Route::post('/hrd/approval2/{id}', [ApprovalController::class, 'approve2'])->name('hrd.approval2.approve');
+    Route::post('/hrd/reject2/{id}', [ApprovalController::class, 'reject2'])->name('izin.reject2');
     //Aproval Lembur
     Route::post('/lembur/approve1/{id}', [ApprovalController::class, 'approveLembur1'])->name('lembur.approval1');
+    Route::post('/lembur/reject1/{id}', [ApprovalController::class, 'rejectLembur1'])->name('lembur.reject1');
     Route::post('/lembur/approve2/{id}', [ApprovalController::class, 'approveLembur2'])->name('lembur.approval2');
+    Route::post('/lembur/reject2/{id}', [ApprovalController::class, 'rejectLembur2'])->name('lembur.approval2.reject');
     Route::get('/lembur/approval1', [ApprovalController::class, 'viewLemburKepalaUnit'])->name('lembur.view.kepalaunit');
     Route::get('/lembur/approval2', [ApprovalController::class, 'viewLemburHRD'])->name('lembur.view.hrd');
+    //Cuti
+    Route::get('/cuti/hrd', [ApprovalController::class, 'viewCutiHRD'])->name('hrd.cuti');
+    Route::post('/cuti/hrd/approve/{id}', [ApprovalController::class, 'approveCuti2'])->name('hrd.approval2.approvecuti');
+    Route::post('/cuti/hrd/reject/{id}', [ApprovalController::class, 'rejectCuti2'])->name('hrd.approval2.reject');
+    Route::post('/cuti/unit/approve/{id}', [ApprovalController::class, 'approveCuti1'])->name('unit.approval1.approve');
+    Route::post('/cuti/unit/reject/{id}', [ApprovalController::class, 'rejectCuti1'])->name('unit.approval1.reject');
+    Route::get('/cuti/unit', [ApprovalController::class, 'viewCutiApproval1'])->name('unit.cuti');
     // Route::get('/form-izin', [CutilemburController::class, 'index'])->name('cutilembur.index');
     // Route::post('/form-izin', [CutilemburController::class, 'store'])->name('cutilembur.store');
     // Route::get('/form-izin/{id}/edit', [CutilemburController::class, 'edit'])->name('cutilembur.edit');

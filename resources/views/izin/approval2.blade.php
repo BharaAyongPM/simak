@@ -1,5 +1,5 @@
 <x-layout bodyClass="g-sidenav-show bg-gray-200">
-    <x-navbars.sidebar activePage="dapproval2"></x-navbars.sidebar>
+    <x-navbars.sidebar activePage="hrdizin"></x-navbars.sidebar>
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
         <x-navbars.navs.auth titlePage="HRD Approval 2"></x-navbars.navs.auth>
 
@@ -61,6 +61,13 @@
                                                                     <button type="submit"
                                                                         class="btn btn-success btn-sm">Approve</button>
                                                                 </form>
+                                                                <form action="{{ route('izin.reject2', $item->id) }}"
+                                                                    method="POST" style="margin-top: 5px;">
+                                                                    @csrf
+                                                                    <textarea name="keterangan2" class="form-control mb-2" placeholder="Keterangan" required></textarea>
+                                                                    <button type="submit"
+                                                                        class="btn btn-danger btn-sm">Reject</button>
+                                                                </form>
                                                             </td>
                                                         </tr>
                                                     @endforeach
@@ -72,8 +79,8 @@
 
                                 <!-- History Tab -->
                                 <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
-                                    @if ($izinDisetujui->isEmpty())
-                                        <p class="text-center">Tidak ada izin yang sudah di-approve pada level 2.</p>
+                                    @if ($izinApprovedOrRejected->isEmpty())
+                                        <p class="text-center">Tidak ada histori izin yang di-approve atau ditolak.</p>
                                     @else
                                         <div class="table-responsive p-4">
                                             <table class="table align-items-center table-hover table-bordered mb-0">
@@ -81,25 +88,38 @@
                                                     <tr>
                                                         <th>No</th>
                                                         <th>Nama Karyawan</th>
-                                                        <th>Tanggal Izin</th>
+                                                        <th>Tanggal Pengajuan</th>
                                                         <th>Jenis Izin</th>
-                                                        <th>Keterangan Approve 1</th>
-                                                        <th>Keterangan Approve 2</th>
-                                                        <th>Tanggal Approve 2</th>
+                                                        <th>Tanggal Mulai</th>
+                                                        <th>Tanggal Selesai</th>
+                                                        <th>Keterangan</th>
+                                                        <th>Status Approve </th>
+                                                        <th>Keterangan Approve/Reject</th>
+                                                        <th>Disetujui/Ditolak Oleh</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @foreach ($izinDisetujui as $index => $item)
+                                                    @foreach ($izinApprovedOrRejected as $index => $izin)
                                                         <tr>
                                                             <td>{{ $index + 1 }}</td>
-                                                            <td>{{ $item->user->name }}</td>
-                                                            <td>{{ \Carbon\Carbon::parse($item->tanggal_izin)->format('d-M-Y') }}
+                                                            <td>{{ $izin->user->name }}</td>
+                                                            <td>{{ \Carbon\Carbon::parse($izin->created_at)->format('d-M-Y') }}
                                                             </td>
-                                                            <td>{{ $item->jenis }}</td>
-                                                            <td>{{ $item->keterangan1 }}</td>
-                                                            <td>{{ $item->keterangan2 }}</td>
-                                                            <td>{{ \Carbon\Carbon::parse($item->updated_at)->format('d-M-Y') }}
+                                                            <td>{{ $izin->jenis }}</td>
+                                                            <td>{{ \Carbon\Carbon::parse($izin->tanggal_mulai)->format('d-M-Y') }}
                                                             </td>
+                                                            <td>{{ \Carbon\Carbon::parse($izin->tanggal_selesai)->format('d-M-Y') }}
+                                                            </td>
+                                                            <td>{{ $izin->keterangan }}</td>
+                                                            <td>
+                                                                @if ($izin->approve_2 == 1)
+                                                                    <span class="badge bg-success">Approved</span>
+                                                                @elseif ($izin->approve_2 == -1)
+                                                                    <span class="badge bg-danger">Rejected</span>
+                                                                @endif
+                                                            </td>
+                                                            <td>{{ $izin->keterangan1 }}</td>
+                                                            <td>{{ $izin->approvedBy1->name ?? 'N/A' }}</td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>
@@ -107,6 +127,7 @@
                                         </div>
                                     @endif
                                 </div>
+
                             </div>
                         </div>
                     </div>
