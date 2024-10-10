@@ -39,6 +39,15 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'kalender-kerja-admin' ? ' active bg-gradient-success' : '' }}  "
+                        href="{{ route('admin.kalender_kerja.index') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">receipt_long</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Kalender Kerja</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link text-white {{ $activePage == 'user_managements' ? 'active bg-gradient-success' : '' }}"
                         href="{{ route('admin.user.management') }}">
                         <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">

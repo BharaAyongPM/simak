@@ -72,6 +72,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/kalender-kerja-karyawan', [KalenderKerjaController::class, 'indexKaryawan'])->name('kalender-kerja.karyawan.index');
     //template kalender kerja
     Route::get('/kalender-kerja/download-template', [KalenderKerjaController::class, 'downloadTemplate'])->name('kalender_kerja.download_template');
+    Route::get('/kalender-kerja/download-templatead', [KalenderKerjaController::class, 'downloadTemplateAdmin'])->name('kalender_kerja.download_template.admin');
     //Aproval izin
     Route::post('/approve1/{id}', [ApprovalController::class, 'approve1'])->name('approve1');
     Route::post('/izin/reject1/{id}', [ApprovalController::class, 'reject1'])->name('unit.approval1.rejectizin');
@@ -113,8 +114,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/lembur/redeem', [LemburController::class, 'redeem'])->name('lembur.redeem');
 
     //Kalender kerja
-    Route::get('kalender_kerja', [KalenderKerjaController::class, 'index'])->name('kalender_kerja.index');
-    Route::post('kalender_kerja/upload', [KalenderKerjaController::class, 'uploadKalenderKerja'])->name('kalender_kerja.upload');
+
+
     Route::post('/kalender_kerja/update-shift', [KalenderKerjaController::class, 'updateShift'])->name('kalender_kerja.update_shift');
     //PROFIL
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -124,7 +125,8 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware(['auth', 'role:ADMIN'])->group(function () {
         Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-
+        Route::post('kalender_kerja/upload', [KalenderKerjaController::class, 'uploadKalenderKerja'])->name('kalender_kerja.upload');
+        Route::get('/admin/kalender-kerja', [KalenderKerjaController::class, 'indexAdmin'])->name('admin.kalender_kerja.index');
         // CRUD Karyawan
         Route::get('/karyawan', [AdminController::class, 'listKaryawan'])->name('admin.karyawan.list');
         Route::get('/karyawan/create', [AdminController::class, 'createKaryawan'])->name('admin.karyawan.create');
@@ -147,6 +149,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/user', function () {
         return view('pages/laravel-examples/user-management');
     })->name('user-management');
+});
+Route::group(['middleware' => ['auth', 'role:KEPALA BAGIAN|KEPALA UNIT']], function () {
+    Route::get('kalender_kerja', [KalenderKerjaController::class, 'index'])->name('kalender_kerja.index');
+    Route::post('kalender_kerja/uploadkpl', [KalenderKerjaController::class, 'uploadKalenderKerjakepalaunit'])->name('kalender_kerja.uploadkplunit');
 });
 Route::group(['middleware' => ['auth', 'role:ADMIN|HRD']], function () {
     // Route untuk menampilkan data karyawan (index)

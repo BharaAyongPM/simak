@@ -93,7 +93,7 @@
                         </div>
 
                         <div class="card-footer">
-                            <form action="{{ route('kalender_kerja.upload') }}" method="POST"
+                            <form action="{{ route('kalender_kerja.uploadkplunit') }}" method="POST"
                                 enctype="multipart/form-data">
                                 @csrf
                                 <input type="file" name="import_file" class="form-control mb-3" required>
