@@ -7,6 +7,7 @@ use App\Http\Controllers\BagianController;
 use App\Http\Controllers\CutiController;
 use App\Http\Controllers\CutilemburController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DatangTerlambatController;
 use App\Http\Controllers\DatastockcutiController;
 use App\Http\Controllers\InformasiController;
 use App\Http\Controllers\IzinController;
@@ -113,8 +114,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/lembur/{id}', [LemburController::class, 'destroy'])->name('lembur.destroy');
     Route::post('/lembur/redeem', [LemburController::class, 'redeem'])->name('lembur.redeem');
 
-    //Kalender kerja
-
+    //DT
+    Route::get('datang_terlambat', [DatangTerlambatController::class, 'index'])->name('datang_terlambat.index');
+    Route::post('datang_terlambat/store', [DatangTerlambatController::class, 'storeOrUpdate'])->name('datang_terlambat.store');
+    Route::put('datang_terlambat/update/{id}', [DatangTerlambatController::class, 'storeOrUpdate'])->name('datang_terlambat.update');
+    Route::get('datang_terlambat/{id}/edit', [DatangTerlambatController::class, 'edit'])->name('datang_terlambat.edit');
+    Route::delete('datang_terlambat/{id}', [DatangTerlambatController::class, 'destroy'])->name('datang_terlambat.destroy');
 
     Route::post('/kalender_kerja/update-shift', [KalenderKerjaController::class, 'updateShift'])->name('kalender_kerja.update_shift');
     //PROFIL

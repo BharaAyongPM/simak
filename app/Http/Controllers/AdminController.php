@@ -175,8 +175,32 @@ class AdminController extends Controller
                     ->where('tanggal', $currentDate->toDateString())
                     ->first();
 
-                // Jika absen ditemukan, tampilkan shift, jika tidak tampilkan 'Alpa'
-                $row['tanggal_' . $currentDate->format('d')] = $absen ? $absen->shift : 'Alpa';
+                // Jika absen tidak ditemukan, cek apakah karyawan cuti atau izin
+                if (!$absen) {
+                    // Cek apakah karyawan cuti pada tanggal ini
+                    $cuti = Cuti::where('user_id', $user->id)
+                        ->whereDate('tanggal_mulai', '<=', $currentDate)
+                        ->whereDate('tanggal_selesai', '>=', $currentDate)
+                        ->first();
+
+                    // Cek apakah karyawan izin pada tanggal ini
+                    $izin = Izin::where('user_id', $user->id)
+                        ->whereDate('tanggal_mulai', '<=', $currentDate)
+                        ->whereDate('tanggal_selesai', '>=', $currentDate)
+                        ->first();
+
+                    if ($cuti) {
+                        $row['tanggal_' . $currentDate->format('d')] = 'Cuti';
+                    } elseif ($izin) {
+                        $row['tanggal_' . $currentDate->format('d')] = 'Izin';
+                    } else {
+                        $row['tanggal_' . $currentDate->format('d')] = 'Alpa';
+                    }
+                } else {
+                    // Jika absen ditemukan, tampilkan shift
+                    $row['tanggal_' . $currentDate->format('d')] = $absen->shift;
+                }
+
                 $currentDate->addDay(); // Tambahkan satu hari
             }
 
@@ -200,7 +224,6 @@ class AdminController extends Controller
         // Return view dengan data yang dibutuhkan
         return view('admin.absensi.rekap', compact('bagians', 'units', 'tanggalAwal', 'tanggalAkhir'));
     }
-
 
 
 

@@ -339,7 +339,7 @@
                                 <span class="nav-link-text">Form Lembur</span>
                             </a>
                         </li>
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a class="nav-link text-white {{ $activePage == 'tukar-shift' ? ' active bg-gradient-success' : '' }}"
                                 href="{{ route('tukarshift') }}">
                                 <i class="material-icons opacity-10">receipt_long</i>
@@ -353,7 +353,7 @@
                                 <i class="material-icons opacity-10">receipt_long</i>
                                 <span class="nav-link-text">Dinas Luar</span>
                             </a>
-                        </li>
+                        </li> --}}
                         <li class="nav-item">
                             <a class="nav-link text-white {{ $activePage == 'datang-terlambat' ? ' active bg-gradient-success' : '' }}"
                                 href="{{ route('datangterlambat') }}">
@@ -361,7 +361,7 @@
                                 <span class="nav-link-text">Datang Terlambat</span>
                             </a>
                         </li>
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a class="nav-link text-white {{ $activePage == 'dokumen' ? ' active bg-gradient-success' : '' }}"
                                 href="{{ route('dokumen') }}">
                                 <i class="material-icons opacity-10">receipt_long</i>
@@ -374,7 +374,7 @@
                                 <i class="material-icons opacity-10">receipt_long</i>
                                 <span class="nav-link-text">Pelatihan</span>
                             </a>
-                        </li>
+                        </li> --}}
                     </ul>
                 </div>
             </li>
