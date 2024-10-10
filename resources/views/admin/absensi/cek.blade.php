@@ -1,5 +1,5 @@
 <x-layout bodyClass="g-sidenav-show bg-gray-200">
-    <x-navbars.sidebar activePage='cek_absensi'></x-navbars.sidebar>
+    <x-navbars.sidebar activePage='admin.absensi.cek'></x-navbars.sidebar>
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
         <x-navbars.navs.auth titlePage="Cek Absensi"></x-navbars.navs.auth>
 
@@ -55,8 +55,8 @@
                                             <th>Shift</th>
                                             <th>Jam Masuk</th>
                                             <th>Jam Pulang</th>
-                                            <th>Lembur</th>
-                                            <th>Status</th>
+                                            {{-- <th>Lembur</th>
+                                            <th>Status</th> --}}
                                             <th>Keterangan</th>
 
                                         </tr>
@@ -70,8 +70,8 @@
                                                 <td>{{ $absensi->shift }}</td>
                                                 <td>{{ $absensi->jam }}</td>
                                                 <td>{{ $absensi->jam_pulang }}</td>
-                                                <td>{{ $absensi->lembur }}</td>
-                                                <td>{{ $absensi->status }}</td>
+                                                {{-- <td>{{ $absensi->lembur }}</td>
+                                                <td>{{ $absensi->status }}</td> --}}
                                                 <td>{{ $absensi->keterangan }}</td>
 
                                             </tr>

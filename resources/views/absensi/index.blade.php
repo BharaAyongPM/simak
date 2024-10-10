@@ -209,8 +209,9 @@
             }
 
             document.getElementById('capture').addEventListener('click', function() {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
+                let scale = 0.5;
+                canvas.width = video.videoWidth * scale;
+                canvas.height = video.videoHeight * scale;
                 context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
                 canvas.classList.remove('d-none');
                 video.classList.add('d-none');

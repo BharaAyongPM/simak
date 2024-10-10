@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AbsensiExport;
 use App\Models\Absensi;
 use App\Models\Bag;
+use App\Models\Cuti;
+use App\Models\Izin;
 use App\Models\Unit;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AdminController extends Controller
@@ -121,69 +125,88 @@ class AdminController extends Controller
     // Rekap Absensi Karyawan (berdasarkan karyawan atau periode)
     public function rekapAbsensi(Request $request)
     {
-        $query = Absensi::query();
-
-        // Filter berdasarkan divisi (bagian)
-        if ($request->has('bagian_id') && $request->bagian_id) {
-            $bagianId = $request->input('bagian_id');
-            $query->whereHas('karyn', function ($q) use ($bagianId) {
-                $q->where('divisi', $bagianId); // 'divisi' adalah kolom di tabel user yang mengarah ke 'id_bagian'
-            });
-        }
-
-        // Filter berdasarkan unit (jika ada)
-        if ($request->has('unit_id') && $request->unit_id) {
-            $unitId = $request->input('unit_id');
-            $query->whereHas('karyn', function ($q) use ($unitId) {
-                $q->where('unit', $unitId); // 'unit' adalah nama kolom yang benar di tabel users
-            });
-        }
-
-        // Filter berdasarkan tanggal awal dan akhir
+        // Ambil filter bagian, unit, tanggal awal, dan tanggal akhir dari request
+        $bagianId = $request->input('bagian_id');
+        $unitId = $request->input('unit_id');
         $tanggalAwal = $request->input('tanggal_awal', Carbon::now()->startOfMonth()->toDateString());
         $tanggalAkhir = $request->input('tanggal_akhir', Carbon::now()->endOfMonth()->toDateString());
-        $query->whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir]);
 
-        // Ambil parameter dari DataTables
+        // Batasi tanggal akhir maksimal hingga hari ini (untuk mencegah melihat masa depan)
+        if (Carbon::parse($tanggalAkhir)->gt(Carbon::now())) {
+            $tanggalAkhir = Carbon::now()->toDateString();
+        }
+
+        // Query untuk mendapatkan data karyawan yang sesuai dengan filter bagian dan unit
+        $query = User::query()
+            ->with(['bagian', 'unt']) // Relasi untuk bagian dan unit
+            ->when($bagianId, function ($q) use ($bagianId) {
+                $q->where('divisi', $bagianId); // Filter berdasarkan bagian
+            })
+            ->when($unitId, function ($q) use ($unitId) {
+                $q->where('unit', $unitId); // Filter berdasarkan unit
+            });
+
+        // Pagination DataTables: Ambil jumlah per halaman dan halaman saat ini
         $length = $request->input('length', 10); // Jumlah data per halaman
         $start = $request->input('start', 0); // Mulai dari data ke berapa
         $page = ($start / $length) + 1; // Hitung halaman berdasarkan 'start'
 
-        // Ambil data absensi dengan paginasi yang sesuai dengan permintaan DataTables
-        $absensis = $query->with(['karyn.bagian', 'karyn.unt'])->paginate($length, ['*'], 'page', $page);
+        // Dapatkan data karyawan sesuai paginasi dan filter
+        $users = $query->paginate($length, ['*'], 'page', $page);
 
-        // Mengambil semua bagian dan unit untuk dropdown filter
-        $bagians = Bag::all(); // Asumsi model 'Bag' untuk tabel 'bag'
-        $units = Unit::all();  // Asumsi model 'Unit' untuk tabel unit
+        // Array untuk menyimpan data yang akan ditampilkan di tabel
+        $data = [];
 
-        // Kembalikan data JSON jika permintaan dari DataTables (server-side)
-        if ($request->ajax()) {
-            $data = [];
-            foreach ($absensis as $index => $absensi) {
-                $data[] = [
-                    'no' => $index + 1 + ($absensis->currentPage() - 1) * $absensis->perPage(),
-                    'tanggal' => $absensi->tanggal,
-                    'karyawan_name' => $absensi->karyn->name ?? 'Data tidak ditemukan',
-                    'bagian_name' => $absensi->karyn->bagian->nama_bagian ?? '-',
-                    'unit' => $absensi->karyn->unt->unit ?? '-',
-                    'shift' => $absensi->shift,
-                    'jam' => $absensi->jam,
-                    'jam_pulang' => $absensi->jam_pulang,
-                    'lembur' => $absensi->lembur ?? '-',
-                    'status' => $absensi->status ?? '-',
-                    'keterangan' => $absensi->keterangan ?? '-',
-                ];
+        // Loop untuk setiap karyawan yang diambil dari query
+        foreach ($users as $index => $user) {
+            // Baris untuk setiap karyawan
+            $row = [
+                'no' => $index + 1 + ($users->currentPage() - 1) * $users->perPage(),
+                'karyawan_name' => $user->name,
+                'bagian_name' => $user->bagian->nama_bagian ?? '-',
+                'unit' => $user->unt->unit ?? '-',
+            ];
+
+            // Loop melalui setiap tanggal dalam periode yang dipilih
+            $currentDate = Carbon::parse($tanggalAwal);
+            while ($currentDate->lte(Carbon::parse($tanggalAkhir))) {
+                // Cek absensi berdasarkan tanggal dan karyawan
+                $absen = Absensi::where('karyawan', $user->id)
+                    ->where('tanggal', $currentDate->toDateString())
+                    ->first();
+
+                // Jika absen ditemukan, tampilkan shift, jika tidak tampilkan 'Alpa'
+                $row['tanggal_' . $currentDate->format('d')] = $absen ? $absen->shift : 'Alpa';
+                $currentDate->addDay(); // Tambahkan satu hari
             }
 
+            // Tambahkan baris ke dalam array data
+            $data[] = $row;
+        }
+
+        // Jika ini permintaan AJAX dari DataTables
+        if ($request->ajax()) {
             return response()->json([
                 'data' => $data,
-                'recordsTotal' => $absensis->total(),
-                'recordsFiltered' => $absensis->total(),
+                'recordsTotal' => $users->total(),
+                'recordsFiltered' => $users->total(),
             ]);
         }
 
-        return view('admin.absensi.rekap', compact('absensis', 'bagians', 'units', 'tanggalAwal', 'tanggalAkhir'));
+        // Mengambil data semua bagian dan unit untuk dropdown filter
+        $bagians = Bag::all(); // Asumsi model 'Bag' untuk tabel 'bag'
+        $units = Unit::all(); // Asumsi model 'Unit' untuk tabel unit
+
+        // Return view dengan data yang dibutuhkan
+        return view('admin.absensi.rekap', compact('bagians', 'units', 'tanggalAwal', 'tanggalAkhir'));
     }
+
+
+
+
+
+
+
     public function getUnitsByBagian($bagianId)
     {
         // Ambil unit berdasarkan bagian yang dipilih
@@ -199,13 +222,26 @@ class AdminController extends Controller
     // Export Absensi Karyawan ke Excel
     public function exportAbsensi(Request $request)
     {
-        // Ambil data absensi berdasarkan filter
-        $absensis = Absensi::whereBetween('tanggal', [$request->tanggal_awal, $request->tanggal_akhir])
-            ->with('user')
-            ->get();
+        ini_set('max_execution_time', 300);
+        $request->validate([
+            'tanggal_awal' => 'required|date',
+            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_awal',
+        ]);
+        $bagian_id = $request->input('bagian_id');
+        $unit_id = $request->input('unit_id');
+        $tanggal_awal = $request->input('tanggal_awal');
+        $tanggal_akhir = $request->input('tanggal_akhir');
 
-        // Buat dan ekspor file Excel
-        return Excel::download(new AbsensiExport($absensis), 'rekap_absensi.xlsx');
+        // Debugging log untuk memeriksa input
+        Log::info('Tanggal Awal: ' . $tanggal_awal);
+        Log::info('Tanggal Akhir: ' . $tanggal_akhir);
+        if (!$tanggal_awal || !$tanggal_akhir) {
+            return back()->with('error', 'Tanggal awal dan akhir harus diisi.');
+        }
+
+        $filename = 'rekap-absensi-' . \Carbon\Carbon::parse($tanggal_awal)->format('d-m-Y') . '-sampai-' . \Carbon\Carbon::parse($tanggal_akhir)->format('d-m-Y') . '.xlsx';
+
+        return Excel::download(new AbsensiExport($bagian_id, $unit_id, $tanggal_awal, $tanggal_akhir), $filename);
     }
 
     // Menampilkan halaman User Management (menambah atau menghapus role pada user)

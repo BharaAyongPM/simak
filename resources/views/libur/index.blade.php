@@ -19,9 +19,11 @@
             @endif
 
             <!-- Tombol Cek Hari Libur dari API -->
-            <div class="d-flex justify-content-end mb-4">
-                <a href="{{ route('libur.fetch') }}" class="btn btn-primary">Cek Hari Libur</a>
+            <div class="d-flex flex-column align-items-end mb-4">
+                <a href="{{ route('libur.fetch') }}" class="btn btn-primary mb-2">Cek Hari Libur</a>
+                <p class="mb-0">Cek Hari Libur hanya dilakukan setahun sekali</p>
             </div>
+
 
             <!-- Hari Libur Table -->
             <div class="row">

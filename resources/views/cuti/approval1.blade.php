@@ -1,5 +1,5 @@
 <x-layout bodyClass="g-sidenav-show bg-gray-200">
-    <x-navbars.sidebar activePage="cuti_approval1"></x-navbars.sidebar>
+    <x-navbars.sidebar activePage="datacutiunit"></x-navbars.sidebar>
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
         <x-navbars.navs.auth titlePage="Cuti Approval 1"></x-navbars.navs.auth>
 
