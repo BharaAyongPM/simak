@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cuti;
+use App\Models\DatangTerlambat;
 use App\Models\Izin;
 use App\Models\Lembur;
 use Illuminate\Http\Request;
@@ -418,5 +419,149 @@ class ApprovalController extends Controller
             ->get();
 
         return view('cuti.approval2', compact('cutiBelumDisetujui', 'cutiDisetujui'));
+    }
+
+
+    //DATANG TERLAMBAT
+    public function approveDatangTerlambat1(Request $request, $id)
+    {
+        $datangTerlambat = DatangTerlambat::findOrFail($id);
+
+        // Logika approve datang terlambat oleh Kepala Unit, Kepala Bagian, atau Direktur
+        if (Auth::user()->hasRole('KEPALA UNIT') && Auth::user()->unit == $datangTerlambat->karyn->unit) {
+            $datangTerlambat->app_1 = 1;
+            $datangTerlambat->approve_atasan = Auth::id();
+            $datangTerlambat->keterangan1 = $request->input('keterangan');
+            $datangTerlambat->save();
+        } elseif (Auth::user()->hasRole('KEPALA BAGIAN') && $datangTerlambat->karyawan->hasRole('KEPALA UNIT')) {
+            $datangTerlambat->app_1 = 1;
+            $datangTerlambat->approve_atasan = Auth::id();
+            $datangTerlambat->keterangan1 = $request->input('keterangan');
+            $datangTerlambat->save();
+        } elseif (Auth::user()->hasRole('DIREKTUR') && $datangTerlambat->karyawan->hasRole('KEPALA BAGIAN')) {
+            $datangTerlambat->app_1 = 1;
+            $datangTerlambat->approve_atasan = Auth::id();
+            $datangTerlambat->keterangan1 = $request->input('keterangan');
+            $datangTerlambat->save();
+        } else {
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk approve datang terlambat.');
+        }
+
+        return redirect()->back()->with('success', 'Datang terlambat telah diapprove.');
+    }
+
+    public function rejectDatangTerlambat1(Request $request, $id)
+    {
+        $datangTerlambat = DatangTerlambat::findOrFail($id);
+
+        // Logika reject datang terlambat oleh Kepala Unit, Kepala Bagian, atau Direktur
+        if (Auth::user()->hasRole('KEPALA UNIT') && Auth::user()->unit == $datangTerlambat->karyn->unit) {
+            $datangTerlambat->app_1 = -1; // Menolak
+            $datangTerlambat->approve_atasan = Auth::id();
+            $datangTerlambat->keterangan1 = $request->input('keterangan');
+            $datangTerlambat->save();
+        } elseif (Auth::user()->hasRole('KEPALA BAGIAN') && $datangTerlambat->karyawan->hasRole('KEPALA UNIT')) {
+            $datangTerlambat->app_1 = -1;
+            $datangTerlambat->approve_atasan = Auth::id();
+            $datangTerlambat->keterangan1 = $request->input('keterangan');
+            $datangTerlambat->save();
+        } elseif (Auth::user()->hasRole('DIREKTUR') && $datangTerlambat->karyawan->hasRole('KEPALA BAGIAN')) {
+            $datangTerlambat->app_1 = -1;
+            $datangTerlambat->approve_atasan = Auth::id();
+            $datangTerlambat->keterangan1 = $request->input('keterangan');
+            $datangTerlambat->save();
+        } else {
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menolak datang terlambat.');
+        }
+
+        return redirect()->back()->with('success', 'Datang terlambat telah ditolak.');
+    }
+    public function viewDatangTerlambatApproval1()
+    {
+        $user = auth()->user();
+
+        // Ambil data datang terlambat dari karyawan yang berada di unit yang sama dengan Kepala Unit / Kepala Bagian / Direktur
+        $datangTerlambatKaryawan = DatangTerlambat::with('karyn')
+            ->whereHas('karyn', function ($query) use ($user) {
+                if ($user->hasRole('KEPALA UNIT')) {
+                    $query->where('unit', $user->unit); // Kepala Unit, ambil karyawan yang satu unit
+                } elseif ($user->hasRole('KEPALA BAGIAN')) {
+                    $query->where('unit', $user->unit)->whereHas('roles', function ($q) {
+                        $q->where('name', 'KEPALA UNIT'); // Kepala Bagian, ambil Kepala Unit
+                    });
+                } elseif ($user->hasRole('DIREKTUR')) {
+                    $query->whereHas('roles', function ($q) {
+                        $q->where('name', 'KEPALA BAGIAN'); // Direktur, ambil Kepala Bagian
+                    });
+                }
+            })
+            ->where('app_1', 0) // Hanya datang terlambat yang belum diapprove oleh kepala unit/bagian
+            ->get();
+
+        // Ambil data history datang terlambat
+        $datangTerlambatHistory = DatangTerlambat::with('karyn')
+            ->where('app_1', '!=', 0) // History yang sudah di-approve/rejected
+            ->whereHas('karyn', function ($query) use ($user) {
+                if ($user->hasRole('KEPALA UNIT')) {
+                    $query->where('unit', $user->unit); // Kepala Unit, ambil karyawan yang satu unit
+                } elseif ($user->hasRole('KEPALA BAGIAN')) {
+                    $query->where('unit', $user->unit)->whereHas('roles', function ($q) {
+                        $q->where('name', 'KEPALA UNIT'); // Kepala Bagian, ambil Kepala Unit
+                    });
+                } elseif ($user->hasRole('DIREKTUR')) {
+                    $query->whereHas('roles', function ($q) {
+                        $q->where('name', 'KEPALA BAGIAN'); // Direktur, ambil Kepala Bagian
+                    });
+                }
+            })
+            ->get();
+
+        return view('datang_terlambat.approval1', compact('datangTerlambatKaryawan', 'datangTerlambatHistory'));
+    }
+    public function approveDatangTerlambat2(Request $request, $id)
+    {
+        $datangTerlambat = DatangTerlambat::findOrFail($id);
+
+        // Logika approve oleh SDI (HRD)
+        if (Auth::user()->hasRole('HRD')) {
+            $datangTerlambat->app_2 = 1; // Set app_2 jadi 1 (approve)
+            $datangTerlambat->approve_sdi = Auth::id(); // Simpan siapa yang meng-approve
+            $datangTerlambat->keterangan2 = $request->input('keterangan2'); // Alasan/keterangan approve dari SDI (HRD)
+            $datangTerlambat->save();
+
+            return redirect()->back()->with('success', 'Pengajuan datang terlambat telah diapprove oleh SDI.');
+        } else {
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk approve pengajuan datang terlambat.');
+        }
+    }
+    public function rejectDatangTerlambat2(Request $request, $id)
+    {
+        $datangTerlambat = DatangTerlambat::findOrFail($id);
+
+        // Logika reject oleh SDI (HRD)
+        if (Auth::user()->hasRole('HRD')) {
+            $datangTerlambat->app_2 = -1; // Set app_2 jadi -1 (reject)
+            $datangTerlambat->approve_sdi = Auth::id(); // Simpan siapa yang menolak
+            $datangTerlambat->keterangan2 = $request->input('keterangan2'); // Alasan/keterangan reject dari SDI (HRD)
+            $datangTerlambat->save();
+
+            return redirect()->back()->with('success', 'Pengajuan datang terlambat telah ditolak oleh SDI.');
+        } else {
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menolak pengajuan datang terlambat.');
+        }
+    }
+    public function viewDatangTerlambatHRD()
+    {
+        // Ambil data datang terlambat yang butuh approval oleh SDI (HRD)
+        $datangTerlambatBelumDisetujui = DatangTerlambat::where('app_1', 1) // Hanya yang sudah diapprove oleh approve_1
+            ->where('app_2', 0) // Yang belum diapprove oleh SDI
+            ->get();
+
+        // Ambil data datang terlambat yang sudah di-approve atau ditolak oleh SDI (HRD)
+        $datangTerlambatDisetujui = DatangTerlambat::where('app_2', 1) // Sudah diapprove SDI
+            ->orWhere('app_2', -1) // Ditolak oleh SDI
+            ->get();
+
+        return view('datang_terlambat.approval_sdi', compact('datangTerlambatBelumDisetujui', 'datangTerlambatDisetujui'));
     }
 }

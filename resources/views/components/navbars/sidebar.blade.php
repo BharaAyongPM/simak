@@ -307,6 +307,35 @@
                     </a>
                 </li>
             @endif
+            @if (Auth::user()->hasRole('KEPALA UNIT') || Auth::user()->hasRole('KEPALA BAGIAN') || Auth::user()->hasRole('DIREKTUR'))
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'datadt' ? ' active bg-gradient-success' : '' }} "
+                        href="{{ route('datang-terlambat.approval') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">event_note</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Data Datang Terlambat</span>
+                        @if ($pendingdt > 0)
+                            <span class="badge2 badge-danger">{{ $pendingdt }}</span> <!-- Tampilkan badge cuti -->
+                        @endif
+                    </a>
+                </li>
+            @endif
+            @if (Auth::user()->hasRole('HRD'))
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $activePage == 'datadtsdi' ? ' active bg-gradient-success' : '' }} "
+                        href="{{ route('datang-terlambat.view-sdi') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">event_note</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Data Datang Terlambat SDI</span>
+                        @if ($pendingdtsdi > 0)
+                            <span class="badge2 badge-danger">{{ $pendingdtsdi }}</span>
+                            <!-- Tampilkan badge cuti -->
+                        @endif
+                    </a>
+                </li>
+            @endif
             <li class="nav-item">
                 <a class="nav-link text-white {{ $activePage == 'form' ? ' active bg-gradient-success' : '' }}"
                     data-bs-toggle="collapse" href="#submenuForm2" aria-expanded="false">
@@ -356,7 +385,7 @@
                         </li> --}}
                         <li class="nav-item">
                             <a class="nav-link text-white {{ $activePage == 'datang-terlambat' ? ' active bg-gradient-success' : '' }}"
-                                href="{{ route('datangterlambat') }}">
+                                href="{{ route('datang_terlambat.index') }}">
                                 <i class="material-icons opacity-10">receipt_long</i>
                                 <span class="nav-link-text">Datang Terlambat</span>
                             </a>
