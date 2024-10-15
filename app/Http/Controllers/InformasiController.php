@@ -38,9 +38,15 @@ class InformasiController extends Controller
         // Simpan file jika ada
         $path = null;
         if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('informasi_files', 'public');
-        }
+            // Buat nama file unik berdasarkan waktu saat ini dan ekstensi file
+            $fotoName = time() . '.' . $request->foto->extension();
 
+            // Pindahkan file ke direktori public/storage/informasi_files
+            $request->foto->move(public_path('storage/informasi_files'), $fotoName);
+
+            // Simpan path yang akan disimpan ke database (sesuai dengan URL yang benar)
+            $path = 'informasi_files/' . $fotoName;
+        }
         // Simpan informasi baru dengan ID user yang sedang login
         Informasi::create([
             'tanggal' => $request->tanggal,

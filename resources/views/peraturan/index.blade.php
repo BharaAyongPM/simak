@@ -75,7 +75,8 @@
                                                         Tidak ada file
                                                     @endif
                                                 </td>
-                                                <td>{{ $peraturan->status == 'aktif' ? 'Aktif' : 'Nonaktif' }}</td>
+                                                <td>{{ $peraturan->status == 1 ? 'Aktif' : 'Nonaktif' }}</td>
+
                                                 <td>{{ $peraturan->jenis }}</td>
                                                 <td>{{ $peraturan->user->name }}</td>
                                                 <td>
@@ -104,7 +105,7 @@
                                 <!-- Modal Edit Peraturan -->
                                 <div class="modal fade" id="editPeraturanModal" tabindex="-1" role="dialog"
                                     aria-labelledby="editPeraturanModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-dialog modal-md" role="document">
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="editPeraturanModalLabel">Edit Peraturan</h5>
@@ -118,53 +119,67 @@
                                                     @method('PUT')
                                                     <!-- Hidden ID Field -->
                                                     <input type="hidden" id="editPeraturanId" name="id">
+
                                                     <!-- Tanggal -->
                                                     <div class="mb-3">
-                                                        <label for="editTanggal" class="form-label">Tanggal</label>
-                                                        <input type="date" class="form-control" id="editTanggal"
-                                                            name="tanggal" required>
+                                                        <div class="card p-3 shadow-sm">
+                                                            <label for="editTanggal" class="form-label">Tanggal</label>
+                                                            <input type="date" class="form-control" id="editTanggal"
+                                                                name="tanggal" required>
+                                                        </div>
                                                     </div>
+
                                                     <!-- Judul -->
                                                     <div class="mb-3">
-                                                        <label for="editJudul" class="form-label">Judul</label>
-                                                        <input type="text" class="form-control" id="editJudul"
-                                                            name="judul" required>
+                                                        <div class="card p-3 shadow-sm">
+                                                            <label for="editJudul" class="form-label">Judul</label>
+                                                            <input type="text" class="form-control" id="editJudul"
+                                                                name="judul" required>
+                                                        </div>
                                                     </div>
+
                                                     <!-- Keterangan -->
                                                     <div class="mb-3">
-                                                        <label for="editKeterangan"
-                                                            class="form-label">Keterangan</label>
-                                                        <textarea class="form-control" id="editKeterangan" name="keterangan" rows="3" required></textarea>
+                                                        <div class="card p-3 shadow-sm">
+                                                            <label for="editKeterangan"
+                                                                class="form-label">Keterangan</label>
+                                                            <textarea class="form-control" id="editKeterangan" name="keterangan" rows="3" required></textarea>
+                                                        </div>
                                                     </div>
+
                                                     <!-- File -->
                                                     <div class="mb-3">
-                                                        <label for="editFhoto" class="form-label">File
-                                                            (Foto/PDF)</label>
-                                                        <input type="file" class="form-control" id="editFhoto"
-                                                            name="fhoto">
+                                                        <div class="card p-3 shadow-sm">
+                                                            <label for="editFhoto" class="form-label">File
+                                                                (Foto/PDF)</label>
+                                                            <input type="file" class="form-control" id="editFhoto"
+                                                                name="fhoto">
+                                                        </div>
                                                     </div>
+
                                                     <!-- Status -->
                                                     <div class="mb-3">
-                                                        <label for="editStatus" class="form-label">Status</label>
-                                                        <select class="form-control" id="editStatus" name="status"
-                                                            required>
-                                                            <option value="aktif">Aktif</option>
-                                                            <option value="nonaktif">Nonaktif</option>
-                                                        </select>
+                                                        <div class="card p-3 shadow-sm">
+                                                            <label for="editStatus" class="form-label">Status</label>
+                                                            <select class="form-control" id="editStatus" name="status"
+                                                                required>
+                                                                <option value="aktif">Aktif</option>
+                                                                <option value="nonaktif">Nonaktif</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
+
                                                     <!-- Jenis -->
                                                     <div class="mb-3">
-                                                        <label for="editJenis" class="form-label">Jenis</label>
-                                                        <input type="text" class="form-control" id="editJenis"
-                                                            name="jenis" required>
+                                                        <div class="card p-3 shadow-sm">
+                                                            <label for="editJenis" class="form-label">Jenis</label>
+                                                            <input type="text" class="form-control" id="editJenis"
+                                                                name="jenis" required>
+                                                        </div>
                                                     </div>
-                                                    <!-- Display Info -->
-                                                    <div class="mb-3">
-                                                        <label for="editDisplayInfo" class="form-label">Display
-                                                            Info</label>
-                                                        <input type="text" class="form-control"
-                                                            id="editDisplayInfo" name="display_info">
-                                                    </div>
+
+
+
                                                     <!-- Submit Button -->
                                                     <div class="row">
                                                         <div class="col-md-12 text-end">
@@ -189,7 +204,7 @@
             <!-- Modal untuk Tambah Peraturan -->
             <div class="modal fade" id="tambahPeraturanModal" tabindex="-1" role="dialog"
                 aria-labelledby="tambahPeraturanModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-dialog modal-md" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="tambahPeraturanModalLabel">Tambah Peraturan</h5>
@@ -202,53 +217,65 @@
                                 @csrf
                                 <!-- Tanggal -->
                                 <div class="mb-3">
-                                    <label for="tanggal" class="form-label">Tanggal</label>
-                                    <input type="date" class="form-control" id="tanggal" name="tanggal"
-                                        required>
-                                    <div class="invalid-feedback">Tanggal wajib diisi.</div>
+                                    <div class="card p-3 shadow-sm">
+                                        <label for="tanggal" class="form-label">Tanggal</label>
+                                        <input type="date" class="form-control" id="tanggal" name="tanggal"
+                                            required>
+                                        <div class="invalid-feedback">Tanggal wajib diisi.</div>
+                                    </div>
                                 </div>
+
                                 <!-- Judul -->
                                 <div class="mb-3">
-                                    <label for="judul" class="form-label">Judul</label>
-                                    <input type="text" class="form-control" id="judul" name="judul"
-                                        required>
-                                    <div class="invalid-feedback">Judul wajib diisi.</div>
+                                    <div class="card p-3 shadow-sm">
+                                        <label for="judul" class="form-label">Judul</label>
+                                        <input type="text" class="form-control" id="judul" name="judul"
+                                            required>
+                                        <div class="invalid-feedback">Judul wajib diisi.</div>
+                                    </div>
                                 </div>
+
                                 <!-- Keterangan -->
                                 <div class="mb-3">
-                                    <label for="keterangan" class="form-label">Keterangan</label>
-                                    <textarea class="form-control" id="keterangan" name="keterangan" rows="3" required></textarea>
-                                    <div class="invalid-feedback">Keterangan wajib diisi.</div>
+                                    <div class="card p-3 shadow-sm">
+                                        <label for="keterangan" class="form-label">Keterangan</label>
+                                        <textarea class="form-control" id="keterangan" name="keterangan" rows="3" required></textarea>
+                                        <div class="invalid-feedback">Keterangan wajib diisi.</div>
+                                    </div>
                                 </div>
+
                                 <!-- File (Foto/PDF) -->
                                 <div class="mb-3">
-                                    <label for="fhoto" class="form-label">File (Foto/PDF)</label>
-                                    <input type="file" class="form-control" id="fhoto" name="fhoto"
-                                        required>
-                                    <div class="invalid-feedback">File wajib diunggah.</div>
+                                    <div class="card p-3 shadow-sm">
+                                        <label for="fhoto" class="form-label">File (Foto/PDF)</label>
+                                        <input type="file" class="form-control" id="fhoto" name="fhoto">
+                                    </div>
                                 </div>
+
                                 <!-- Status -->
                                 <div class="mb-3">
-                                    <label for="status" class="form-label">Status</label>
-                                    <select class="form-control" id="status" name="status" required>
-                                        <option value="aktif">Aktif</option>
-                                        <option value="nonaktif">Nonaktif</option>
-                                    </select>
-                                    <div class="invalid-feedback">Status wajib dipilih.</div>
+                                    <div class="card p-3 shadow-sm">
+                                        <label for="status" class="form-label">Status</label>
+                                        <select class="form-control" id="status" name="status" required>
+                                            <option value="aktif">Aktif</option>
+                                            <option value="nonaktif">Nonaktif</option>
+                                        </select>
+                                        <div class="invalid-feedback">Status wajib dipilih.</div>
+                                    </div>
                                 </div>
+
                                 <!-- Jenis -->
                                 <div class="mb-3">
-                                    <label for="jenis" class="form-label">Jenis</label>
-                                    <input type="text" class="form-control" id="jenis" name="jenis"
-                                        required>
-                                    <div class="invalid-feedback">Jenis wajib diisi.</div>
+                                    <div class="card p-3 shadow-sm">
+                                        <label for="jenis" class="form-label">Jenis</label>
+                                        <input type="text" class="form-control" id="jenis" name="jenis"
+                                            required>
+                                        <div class="invalid-feedback">Jenis wajib diisi.</div>
+                                    </div>
                                 </div>
-                                <!-- Display Info -->
-                                <div class="mb-3">
-                                    <label for="display_info" class="form-label">Display Info</label>
-                                    <input type="text" class="form-control" id="display_info"
-                                        name="display_info">
-                                </div>
+
+
+
                                 <!-- Submit Button -->
                                 <div class="row">
                                     <div class="col-md-12 text-end">
@@ -261,6 +288,7 @@
                 </div>
             </div>
             <!-- End of Tambah Peraturan Modal -->
+
 
             <x-footers.auth></x-footers.auth>
         </div>
@@ -302,14 +330,14 @@
                     url: '/peraturan/edit/' + id,
                     method: 'GET',
                     success: function(data) {
-                        $('#editPeraturanForm').attr('action', '/peraturan/update/' + id);
+                        $('#editPeraturanForm').attr('action', '/peraturan/' + id);
                         $('#editPeraturanId').val(data.id);
                         $('#editTanggal').val(data.tanggal);
                         $('#editJudul').val(data.judul);
                         $('#editKeterangan').val(data.keterangan);
                         $('#editStatus').val(data.status);
                         $('#editJenis').val(data.jenis);
-                        $('#editDisplayInfo').val(data.display_info);
+
                     },
                     error: function() {
                         alert('Gagal mengambil data peraturan');
