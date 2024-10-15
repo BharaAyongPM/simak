@@ -96,7 +96,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/cuti/unit/reject/{id}', [ApprovalController::class, 'rejectCuti1'])->name('unit.approval1.reject');
     Route::get('/cuti/unit', [ApprovalController::class, 'viewCutiApproval1'])->name('unit.cuti');
     //DT APROVALL
-    Route::get('/approval', [ApprovalController::class, 'viewDatangTerlambatApproval1'])->name('datang-terlambat.approval');
+    Route::get('/approval', [ApprovalController::class, 'dataDatangTerlambat'])->name('datang-terlambat.approval');
     Route::post('/approve/{id}', [ApprovalController::class, 'approveDatangTerlambat1'])->name('datang-terlambat.approve');
     Route::post('/reject/{id}', [ApprovalController::class, 'rejectDatangTerlambat1'])->name('datang-terlambat.reject');
     Route::post('/datang-terlambat/approve-sdi/{id}', [ApprovalController::class, 'approveDatangTerlambat2'])->name('datang-terlambat.approve-sdi');
@@ -124,8 +124,8 @@ Route::middleware('auth')->group(function () {
 
     //DT
     Route::get('datang_terlambat', [DatangTerlambatController::class, 'index'])->name('datang_terlambat.index');
-    Route::post('datang_terlambat/store', [DatangTerlambatController::class, 'storeOrUpdate'])->name('datang_terlambat.store');
-    Route::put('datang_terlambat/update/{id}', [DatangTerlambatController::class, 'storeOrUpdate'])->name('datang_terlambat.update');
+    Route::post('datang_terlambat/store', [DatangTerlambatController::class, 'store'])->name('datang_terlambat.store');
+    Route::put('datang_terlambat/update/{id}', [DatangTerlambatController::class, 'Update'])->name('datang_terlambat.update');
     Route::get('datang_terlambat/{id}/edit', [DatangTerlambatController::class, 'edit'])->name('datang_terlambat.edit');
     Route::delete('datang_terlambat/{id}', [DatangTerlambatController::class, 'destroy'])->name('datang_terlambat.destroy');
 

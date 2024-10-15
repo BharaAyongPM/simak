@@ -94,24 +94,49 @@ class IzinController extends Controller
     }
     public function dataizin()
     {
-        // Mendapatkan user yang sedang login (Kepala Unit)
-        $user = auth()->user();
+        $user = Auth::user();
 
-        // Mengambil data izin dari karyawan yang berada di unit yang sama dengan Kepala Unit
-        // Daftar izin yang belum di-approve (pending)
-        $izinPending = Izin::with('user')
-            ->whereHas('user', function ($query) use ($user) {
-                $query->where('unit', $user->unit); // Ambil karyawan yang unit-nya sama dengan kepala unit
-            })
-            ->where('approve_1', 0) // Hanya yang belum diapprove oleh approve 1
-            ->get();
+        // Jika user adalah Kepala Unit, tampilkan izin dari karyawan di unit yang sama
+        if ($user->hasRole('KEPALA UNIT')) {
+            $izinPending = Izin::with('user')
+                ->whereHas('user', function ($query) use ($user) {
+                    $query->where('unit', $user->unit) // Karyawan di unit yang sama
+                        ->whereHas('roles', function ($q) {
+                            $q->where('name', 'KARYAWAN'); // Hanya yang rolenya Karyawan
+                        });
+                })
+                ->where('approve_1', 0) // Belum di-approve
+                ->get();
+        }
+        // Jika user adalah Kepala Bagian, tampilkan izin dari Kepala Unit (berdasarkan bagian)
+        elseif ($user->hasRole('KEPALA BAGIAN')) {
+            $izinPending = Izin::with('user')
+                ->whereHas('user', function ($query) use ($user) {
+                    $query->where('divisi', $user->divisi) // Karyawan di bagian yang sama
+                        ->whereHas('roles', function ($q) {
+                            $q->where('name', 'KEPALA UNIT'); // Hanya yang rolenya Kepala Unit
+                        });
+                })
+                ->where('approve_1', 0) // Belum di-approve
+                ->get();
+        }
+        // Jika user adalah Direktur, tampilkan izin dari Kepala Bagian (tanpa unit, berdasarkan divisi)
+        elseif ($user->hasRole('DIREKTUR')) {
+            $izinPending = Izin::with('user')
+                ->whereHas('user', function ($query) {
+                    $query->whereHas('roles', function ($q) {
+                        $q->where('name', 'KEPALA BAGIAN'); // Hanya yang rolenya Kepala Bagian
+                    });
+                })
+                ->where('approve_1', 0) // Belum di-approve
+                ->get();
+        } else {
+            $izinPending = collect(); // Jika tidak ada role yang sesuai, kosongkan izin
+        }
 
-        // Daftar izin yang sudah di-approve (approved) atau ditolak (rejected) (histori)
-        $izinApprovedOrRejected = Izin::with(['user', 'approvedBy1']) // Tambahkan approvedBy1 untuk eager loading
-            ->whereHas('user', function ($query) use ($user) {
-                $query->where('unit', $user->unit); // Ambil karyawan yang unit-nya sama dengan kepala unit
-            })
-            ->whereIn('approve_1', [1, -1]) // Yang sudah diapprove atau ditolak oleh approve 1
+        // Ambil data history izin (yang sudah di-approve atau ditolak)
+        $izinApprovedOrRejected = Izin::with(['user', 'approvedBy1'])
+            ->where('approve_1', '!=', 0) // History yang sudah di-approve atau ditolak
             ->get();
 
         return view('izin.izinkaryawan', compact('izinPending', 'izinApprovedOrRejected'));

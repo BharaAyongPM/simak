@@ -25,7 +25,8 @@ class ApprovalController extends Controller
         }
 
         // Logika approve 1 untuk Kepala Bagian (ketika Kepala Unit yang mengajukan)
-        elseif (Auth::user()->hasRole('KEPALA BAGIAN') && Auth::user()->unit == $izin->user->unit && $izin->user->hasRole('KEPALA UNIT')) {
+        elseif (Auth::user()->hasRole('KEPALA BAGIAN') && $izin->user->hasRole('KEPALA UNIT')) {
+            // Hapus pengecekan berdasarkan unit untuk Kepala Bagian
             $izin->approve_1 = 1;
             $izin->approved_by_1 = Auth::id();
             $izin->keterangan1 = $request->input('keterangan1');
@@ -47,31 +48,33 @@ class ApprovalController extends Controller
             return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk approve.');
         }
     }
+
     public function reject1(Request $request, $id)
     {
         $izin = Izin::findOrFail($id);
 
         // Logika reject 1 untuk Kepala Unit
         if (Auth::user()->hasRole('KEPALA UNIT') && Auth::user()->unit == $izin->user->unit) {
-            $izin->approve_1 = -1; // Diset 0 untuk menolak
+            $izin->approve_1 = -1; // Menandakan izin ditolak
             $izin->approved_by_1 = Auth::id();
             $izin->keterangan1 = $request->input('keterangan1'); // Alasan penolakan
             $izin->save();
             return redirect()->back()->with('success', 'Izin telah ditolak oleh Kepala Unit.');
         }
 
-        // Logika reject 1 untuk Kepala Bagian (ketika Kepala Unit yang mengajukan)
-        elseif (Auth::user()->hasRole('KEPALA BAGIAN') && Auth::user()->unit == $izin->user->unit && $izin->user->hasRole('KEPALA UNIT')) {
-            $izin->approve_1 = -1; // Diset 0 untuk menolak
+        // Logika reject 1 untuk Kepala Bagian (ketika Kepala Unit yang mengajukan izin)
+        elseif (Auth::user()->hasRole('KEPALA BAGIAN') && $izin->user->hasRole('KEPALA UNIT')) {
+            // Hapus pengecekan unit untuk Kepala Bagian
+            $izin->approve_1 = -1; // Menandakan izin ditolak
             $izin->approved_by_1 = Auth::id();
             $izin->keterangan1 = $request->input('keterangan1'); // Alasan penolakan
             $izin->save();
             return redirect()->back()->with('success', 'Izin telah ditolak oleh Kepala Bagian.');
         }
 
-        // Logika reject 1 untuk Direktur (ketika Kepala Bagian yang mengajukan)
+        // Logika reject 1 untuk Direktur (ketika Kepala Bagian yang mengajukan izin)
         elseif (Auth::user()->hasRole('DIREKTUR') && $izin->user->hasRole('KEPALA BAGIAN')) {
-            $izin->approve_1 = -1; // Diset 0 untuk menolak
+            $izin->approve_1 = -1; // Menandakan izin ditolak
             $izin->approved_by_1 = Auth::id();
             $izin->keterangan1 = $request->input('keterangan1'); // Alasan penolakan
             $izin->save();
@@ -83,6 +86,7 @@ class ApprovalController extends Controller
             return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menolak.');
         }
     }
+
 
     public function approve2Index()
     {
@@ -151,7 +155,8 @@ class ApprovalController extends Controller
         }
 
         // Logika approve lembur 1 untuk Kepala Bagian (ketika Kepala Unit yang mengajukan lembur)
-        elseif (Auth::user()->hasRole('KEPALA BAGIAN') && Auth::user()->unit == $lembur->user->unit && $lembur->user->hasRole('KEPALA UNIT')) {
+        elseif (Auth::user()->hasRole('KEPALA BAGIAN') && $lembur->user->hasRole('KEPALA UNIT')) {
+            // Hapus pengecekan unit untuk Kepala Bagian
             $lembur->approve_1 = 1;
             $lembur->approved_by_1 = Auth::id();
             $lembur->keterangan1 = $request->input('keterangan1');
@@ -173,6 +178,7 @@ class ApprovalController extends Controller
             return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk approve.');
         }
     }
+
     public function rejectLembur1(Request $request, $id)
     {
         $lembur = Lembur::findOrFail($id);
@@ -187,7 +193,8 @@ class ApprovalController extends Controller
         }
 
         // Logika reject lembur 1 untuk Kepala Bagian (ketika Kepala Unit yang mengajukan lembur)
-        elseif (Auth::user()->hasRole('KEPALA BAGIAN') && Auth::user()->unit == $lembur->user->unit && $lembur->user->hasRole('KEPALA UNIT')) {
+        elseif (Auth::user()->hasRole('KEPALA BAGIAN') && $lembur->user->hasRole('KEPALA UNIT')) {
+            // Hapus pengecekan unit untuk Kepala Bagian
             $lembur->approve_1 = -1; // Menandakan lembur ditolak
             $lembur->approved_by_1 = Auth::id();
             $lembur->keterangan1 = $request->input('keterangan1');
@@ -209,6 +216,7 @@ class ApprovalController extends Controller
             return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menolak lembur.');
         }
     }
+
 
     public function approveLembur2(Request $request, $id)
     {
@@ -244,25 +252,48 @@ class ApprovalController extends Controller
     }
     public function viewLemburKepalaUnit()
     {
-        // Ambil user yang sedang login
         $user = auth()->user();
 
-        // Ambil data lembur yang masih butuh approval 1 oleh Kepala Unit
-        $lemburBelumDisetujui = Lembur::where('approve_1', 0)
-            ->whereHas('user', function ($query) use ($user) {
-                $query->where('unit', $user->unit); // Hanya lembur dari unit yang sama
-            })
-            ->get();
+        // Handle lembur approval logic based on the role of the user
+        if ($user->hasRole('KEPALA UNIT')) {
+            // Kepala Unit, approve lembur dari karyawan di unit yang sama
+            $lemburBelumDisetujui = Lembur::where('approve_1', 0)
+                ->whereHas('user', function ($query) use ($user) {
+                    $query->where('unit', $user->unit)->whereHas('roles', function ($q) {
+                        $q->where('name', 'KARYAWAN'); // Only karyawan
+                    });
+                })
+                ->get();
+        } elseif ($user->hasRole('KEPALA BAGIAN')) {
+            // Kepala Bagian, approve lembur dari Kepala Unit
+            $lemburBelumDisetujui = Lembur::where('approve_1', 0)
+                ->whereHas('user', function ($query) use ($user) {
+                    $query->where('divisi', $user->divisi)->whereHas('roles', function ($q) {
+                        $q->where('name', 'KEPALA UNIT'); // Only Kepala Unit
+                    });
+                })
+                ->get();
+        } elseif ($user->hasRole('DIREKTUR')) {
+            // Direktur, approve lembur dari Kepala Bagian
+            $lemburBelumDisetujui = Lembur::where('approve_1', 0)
+                ->whereHas('user', function ($query) {
+                    $query->whereHas('roles', function ($q) {
+                        $q->where('name', 'KEPALA BAGIAN'); // Only Kepala Bagian
+                    });
+                })
+                ->get();
+        } else {
+            $lemburBelumDisetujui = collect(); // No pending lembur if the user is not a Kepala Unit, Kepala Bagian, or Direktur
+        }
 
-        // Ambil data lembur yang sudah di-approve atau ditolak oleh Kepala Unit (History)
-        $lemburDisetujui = Lembur::whereIn('approve_1', [1, -1]) // 1 = approved, -1 = rejected
-            ->whereHas('user', function ($query) use ($user) {
-                $query->where('unit', $user->unit);
-            })
+        // Fetch lembur history (approved or rejected by the logged-in user)
+        $lemburDisetujui = Lembur::whereIn('approve_1', [1, -1])
+            ->where('approved_by_1', $user->id) // Only show history that was approved/rejected by the logged-in user
             ->get();
 
         return view('lembur.approval1', compact('lemburBelumDisetujui', 'lemburDisetujui'));
     }
+
 
 
     public function viewLemburHRD()
@@ -368,37 +399,48 @@ class ApprovalController extends Controller
     {
         $user = auth()->user();
 
-        // Ambil data cuti dari karyawan yang berada di unit yang sama dengan Kepala Unit / Kepala Bagian / Direktur
+        // Ambil data cuti dari karyawan yang berada di divisi atau unit yang sama dengan Kepala Unit / Kepala Bagian / Direktur
         $cutiKaryawan = Cuti::with('user')
             ->whereHas('user', function ($query) use ($user) {
                 if ($user->hasRole('KEPALA UNIT')) {
-                    $query->where('unit', $user->unit); // Kepala Unit, ambil karyawan yang satu unit
-                } elseif ($user->hasRole('KEPALA BAGIAN')) {
+                    // Kepala Unit, ambil karyawan yang satu unit dan rolenya KARYAWAN
                     $query->where('unit', $user->unit)->whereHas('roles', function ($q) {
-                        $q->where('name', 'KEPALA UNIT'); // Kepala Bagian, ambil Kepala Unit
+                        $q->where('name', 'KARYAWAN'); // Hanya yang rolenya Karyawan
+                    });
+                } elseif ($user->hasRole('KEPALA BAGIAN')) {
+                    // Kepala Bagian, ambil Kepala Unit di divisi yang sama
+                    $query->where('divisi', $user->divisi)->whereHas('roles', function ($q) {
+                        $q->where('name', 'KEPALA UNIT'); // Hanya yang rolenya Kepala Unit
                     });
                 } elseif ($user->hasRole('DIREKTUR')) {
+                    // Direktur, ambil Kepala Bagian (tidak peduli unit)
                     $query->whereHas('roles', function ($q) {
-                        $q->where('name', 'KEPALA BAGIAN'); // Direktur, ambil Kepala Bagian
+                        $q->where('name', 'KEPALA BAGIAN'); // Hanya yang rolenya Kepala Bagian
                     });
                 }
             })
             ->where('approve_1', 0) // Hanya cuti yang belum diapprove oleh kepala unit/bagian
             ->get();
 
-        // Ambil data history cuti
+        // Ambil data history cuti yang di-approve atau ditolak oleh user yang sedang login
         $cutiHistory = Cuti::with('user')
             ->where('approve_1', '!=', 0) // History yang sudah di-approve/rejected
+            ->where('approved_by_1', $user->id) // Hanya yang di-approve oleh user yang sedang login
             ->whereHas('user', function ($query) use ($user) {
                 if ($user->hasRole('KEPALA UNIT')) {
-                    $query->where('unit', $user->unit); // Kepala Unit, ambil karyawan yang satu unit
-                } elseif ($user->hasRole('KEPALA BAGIAN')) {
+                    // Kepala Unit, ambil karyawan di unit yang sama dan rolenya KARYAWAN
                     $query->where('unit', $user->unit)->whereHas('roles', function ($q) {
-                        $q->where('name', 'KEPALA UNIT'); // Kepala Bagian, ambil Kepala Unit
+                        $q->where('name', 'KARYAWAN');
+                    });
+                } elseif ($user->hasRole('KEPALA BAGIAN')) {
+                    // Kepala Bagian, ambil Kepala Unit di divisi yang sama
+                    $query->where('divisi', $user->divisi)->whereHas('roles', function ($q) {
+                        $q->where('name', 'KEPALA UNIT');
                     });
                 } elseif ($user->hasRole('DIREKTUR')) {
+                    // Direktur, ambil Kepala Bagian (tidak peduli unit)
                     $query->whereHas('roles', function ($q) {
-                        $q->where('name', 'KEPALA BAGIAN'); // Direktur, ambil Kepala Bagian
+                        $q->where('name', 'KEPALA BAGIAN');
                     });
                 }
             })
@@ -406,6 +448,8 @@ class ApprovalController extends Controller
 
         return view('cuti.approval1', compact('cutiKaryawan', 'cutiHistory'));
     }
+
+
     public function viewCutiHRD()
     {
         // Ambil data cuti yang butuh approval 2 oleh HRD
@@ -423,32 +467,53 @@ class ApprovalController extends Controller
 
 
     //DATANG TERLAMBAT
-    public function approveDatangTerlambat1(Request $request, $id)
+    public function dataDatangTerlambat()
     {
-        $datangTerlambat = DatangTerlambat::findOrFail($id);
+        // Mendapatkan user yang sedang login
+        $user = auth()->user();
 
-        // Logika approve datang terlambat oleh Kepala Unit, Kepala Bagian, atau Direktur
-        if (Auth::user()->hasRole('KEPALA UNIT') && Auth::user()->unit == $datangTerlambat->karyn->unit) {
-            $datangTerlambat->app_1 = 1;
-            $datangTerlambat->approve_atasan = Auth::id();
-            $datangTerlambat->keterangan1 = $request->input('keterangan');
-            $datangTerlambat->save();
-        } elseif (Auth::user()->hasRole('KEPALA BAGIAN') && $datangTerlambat->karyawan->hasRole('KEPALA UNIT')) {
-            $datangTerlambat->app_1 = 1;
-            $datangTerlambat->approve_atasan = Auth::id();
-            $datangTerlambat->keterangan1 = $request->input('keterangan');
-            $datangTerlambat->save();
-        } elseif (Auth::user()->hasRole('DIREKTUR') && $datangTerlambat->karyawan->hasRole('KEPALA BAGIAN')) {
-            $datangTerlambat->app_1 = 1;
-            $datangTerlambat->approve_atasan = Auth::id();
-            $datangTerlambat->keterangan1 = $request->input('keterangan');
-            $datangTerlambat->save();
+        // Ambil data pengajuan datang terlambat yang belum di-approve
+        if ($user->hasRole('KEPALA UNIT')) {
+            $datangTerlambatPending = DatangTerlambat::with('karyn')
+                ->whereHas('karyn', function ($query) use ($user) {
+                    $query->where('unit', $user->unit)->whereHas('roles', function ($q) {
+                        $q->where('name', 'KARYAWAN');
+                    });
+                })
+                ->where('app_1', 0) // Pending approval
+                ->get();
+        } elseif ($user->hasRole('KEPALA BAGIAN')) {
+            $datangTerlambatPending = DatangTerlambat::with('karyn')
+                ->whereHas('karyn', function ($query) use ($user) {
+                    $query->where('divisi', $user->divisi)->whereHas('roles', function ($q) {
+                        $q->where('name', 'KEPALA UNIT');
+                    });
+                })
+                ->where('app_1', 0)
+                ->get();
+        } elseif ($user->hasRole('DIREKTUR')) {
+            $datangTerlambatPending = DatangTerlambat::with('karyn')
+                ->whereHas('karyn', function ($query) {
+                    $query->whereHas('roles', function ($q) {
+                        $q->where('name', 'KEPALA BAGIAN');
+                    });
+                })
+                ->where('app_1', 0)
+                ->get();
         } else {
-            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk approve datang terlambat.');
+            $datangTerlambatPending = collect(); // Kosong jika user tidak sesuai role
         }
 
-        return redirect()->back()->with('success', 'Datang terlambat telah diapprove.');
+        // Ambil data history datang terlambat yang di-approve atau ditolak oleh user yang sedang login
+        $datangTerlambatHistory = DatangTerlambat::with('karyn', 'approveAtasan')
+            ->whereIn('app_1', [1, -1]) // Approved atau Rejected
+            ->where('approve_atasan', $user->id) // Hanya yang di-approve/reject oleh user yang login
+            ->get();
+
+        // Kirim variabel ke view
+        return view('datang_terlambat.approval1', compact('datangTerlambatPending', 'datangTerlambatHistory'));
     }
+
 
     public function rejectDatangTerlambat1(Request $request, $id)
     {
@@ -476,48 +541,46 @@ class ApprovalController extends Controller
 
         return redirect()->back()->with('success', 'Datang terlambat telah ditolak.');
     }
-    public function viewDatangTerlambatApproval1()
+    public function approveDatangTerlambat1(Request $request, $id)
     {
-        $user = auth()->user();
+        $datangTerlambat = DatangTerlambat::findOrFail($id);
 
-        // Ambil data datang terlambat dari karyawan yang berada di unit yang sama dengan Kepala Unit / Kepala Bagian / Direktur
-        $datangTerlambatKaryawan = DatangTerlambat::with('karyn')
-            ->whereHas('karyn', function ($query) use ($user) {
-                if ($user->hasRole('KEPALA UNIT')) {
-                    $query->where('unit', $user->unit); // Kepala Unit, ambil karyawan yang satu unit
-                } elseif ($user->hasRole('KEPALA BAGIAN')) {
-                    $query->where('unit', $user->unit)->whereHas('roles', function ($q) {
-                        $q->where('name', 'KEPALA UNIT'); // Kepala Bagian, ambil Kepala Unit
-                    });
-                } elseif ($user->hasRole('DIREKTUR')) {
-                    $query->whereHas('roles', function ($q) {
-                        $q->where('name', 'KEPALA BAGIAN'); // Direktur, ambil Kepala Bagian
-                    });
-                }
-            })
-            ->where('app_1', 0) // Hanya datang terlambat yang belum diapprove oleh kepala unit/bagian
-            ->get();
+        // Logika approve datang terlambat oleh Kepala Unit
+        if (Auth::user()->hasRole('KEPALA UNIT') && Auth::user()->unit == $datangTerlambat->karyn->unit) {
+            $datangTerlambat->app_1 = 1; // Setujui oleh Kepala Unit
+            $datangTerlambat->approve_atasan = Auth::id(); // Menyimpan ID atasan yang approve
+            $datangTerlambat->keterangan1 = $request->input('keterangan'); // Alasan approve
+            $datangTerlambat->save();
 
-        // Ambil data history datang terlambat
-        $datangTerlambatHistory = DatangTerlambat::with('karyn')
-            ->where('app_1', '!=', 0) // History yang sudah di-approve/rejected
-            ->whereHas('karyn', function ($query) use ($user) {
-                if ($user->hasRole('KEPALA UNIT')) {
-                    $query->where('unit', $user->unit); // Kepala Unit, ambil karyawan yang satu unit
-                } elseif ($user->hasRole('KEPALA BAGIAN')) {
-                    $query->where('unit', $user->unit)->whereHas('roles', function ($q) {
-                        $q->where('name', 'KEPALA UNIT'); // Kepala Bagian, ambil Kepala Unit
-                    });
-                } elseif ($user->hasRole('DIREKTUR')) {
-                    $query->whereHas('roles', function ($q) {
-                        $q->where('name', 'KEPALA BAGIAN'); // Direktur, ambil Kepala Bagian
-                    });
-                }
-            })
-            ->get();
+            return redirect()->back()->with('success', 'Datang terlambat telah diapprove oleh Kepala Unit.');
+        }
 
-        return view('datang_terlambat.approval1', compact('datangTerlambatKaryawan', 'datangTerlambatHistory'));
+        // Logika approve oleh Kepala Bagian (ketika Kepala Unit yang mengajukan datang terlambat)
+        elseif (Auth::user()->hasRole('KEPALA BAGIAN') && $datangTerlambat->karyn->hasRole('KEPALA UNIT')) {
+            $datangTerlambat->app_1 = 1; // Setujui oleh Kepala Bagian
+            $datangTerlambat->approve_atasan = Auth::id(); // Menyimpan ID atasan yang approve
+            $datangTerlambat->keterangan1 = $request->input('keterangan'); // Alasan approve
+            $datangTerlambat->save();
+
+            return redirect()->back()->with('success', 'Datang terlambat telah diapprove oleh Kepala Bagian.');
+        }
+
+        // Logika approve oleh Direktur (ketika Kepala Bagian yang mengajukan datang terlambat)
+        elseif (Auth::user()->hasRole('DIREKTUR') && $datangTerlambat->karyn->hasRole('KEPALA BAGIAN')) {
+            $datangTerlambat->app_1 = 1; // Setujui oleh Direktur
+            $datangTerlambat->approve_atasan = Auth::id(); // Menyimpan ID atasan yang approve
+            $datangTerlambat->keterangan1 = $request->input('keterangan'); // Alasan approve
+            $datangTerlambat->save();
+
+            return redirect()->back()->with('success', 'Datang terlambat telah diapprove oleh Direktur.');
+        }
+
+        // Jika user tidak memiliki hak untuk approve
+        else {
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk approve.');
+        }
     }
+
     public function approveDatangTerlambat2(Request $request, $id)
     {
         $datangTerlambat = DatangTerlambat::findOrFail($id);

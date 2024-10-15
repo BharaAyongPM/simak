@@ -34,34 +34,139 @@ class AppServiceProvider extends ServiceProvider
         View::composer('*', function ($view) {
             $user = Auth::user();
             if (Auth::check()) {
-                // Hitung data pending berdasarkan role user
-                // Hitung Izin yang belum di-approve dari unit yang sama
-                $pendingIzin = Izin::where('approve_1', 0)
-                    ->whereHas('user', function ($query) use ($user) {
-                        $query->where('unit', $user->unit); // Sesuaikan dengan unit user yang sedang login
-                    })
-                    ->count();
+                // Inisialisasi variabel untuk pending data
+                $pendingIzin = 0;
+                $pendingLembur = 0;
+                $pendingCuti = 0;
+                $pendingdt = 0;
+                $pendingIzinsdi = 0;
+                $pendingLembursdi = 0;
+                $pendingCutisdi = 0;
+                $pendingdtsdi = 0;
 
-                // Hitung Lembur yang belum di-approve dari unit yang sama
-                $pendingLembur = Lembur::where('approve_1', 0)
-                    ->whereHas('user', function ($query) use ($user) {
-                        $query->where('unit', $user->unit); // Sesuaikan dengan unit user yang sedang login
-                    })
-                    ->count();
+                // Jika user adalah Kepala Unit, hitung data pending dari Karyawan
+                if ($user->hasRole('KEPALA UNIT')) {
+                    // Hitung Izin dari Karyawan yang belum di-approve
+                    $pendingIzin = Izin::where('approve_1', 0)
+                        ->whereHas('user', function ($query) use ($user) {
+                            $query->where('unit', $user->unit)
+                                ->whereHas('roles', function ($q) {
+                                    $q->where('name', 'KARYAWAN'); // Hanya dari Karyawan
+                                });
+                        })
+                        ->count();
 
-                // Hitung Cuti yang belum di-approve dari unit yang sama
-                $pendingCuti = Cuti::where('approve_1', 0)
-                    ->whereHas('user', function ($query) use ($user) {
-                        $query->where('unit', $user->unit); // Sesuaikan dengan unit user yang sedang login
-                    })
-                    ->count();
+                    // Hitung Lembur dari Karyawan yang belum di-approve
+                    $pendingLembur = Lembur::where('approve_1', 0)
+                        ->whereHas('user', function ($query) use ($user) {
+                            $query->where('unit', $user->unit)
+                                ->whereHas('roles', function ($q) {
+                                    $q->where('name', 'KARYAWAN'); // Hanya dari Karyawan
+                                });
+                        })
+                        ->count();
 
-                // Hitung Datang Terlambat yang belum di-approve dari unit yang sama
-                $pendingdt = DatangTerlambat::where('app_1', 0)
-                    ->whereHas('karyn', function ($query) use ($user) {
-                        $query->where('unit', $user->unit); // Sesuaikan dengan unit user yang sedang login
-                    })
-                    ->count();
+                    // Hitung Cuti dari Karyawan yang belum di-approve
+                    $pendingCuti = Cuti::where('approve_1', 0)
+                        ->whereHas('user', function ($query) use ($user) {
+                            $query->where('unit', $user->unit)
+                                ->whereHas('roles', function ($q) {
+                                    $q->where('name', 'KARYAWAN'); // Hanya dari Karyawan
+                                });
+                        })
+                        ->count();
+
+                    // Hitung Datang Terlambat dari Karyawan yang belum di-approve
+                    $pendingdt = DatangTerlambat::where('app_1', 0)
+                        ->whereHas('karyn', function ($query) use ($user) {
+                            $query->where('unit', $user->unit)
+                                ->whereHas('roles', function ($q) {
+                                    $q->where('name', 'KARYAWAN'); // Hanya dari Karyawan
+                                });
+                        })
+                        ->count();
+                }
+                // Jika user adalah Kepala Bagian, hitung data pending dari Kepala Unit
+                elseif ($user->hasRole('KEPALA BAGIAN')) {
+                    // Hitung Izin dari Kepala Unit yang belum di-approve
+                    $pendingIzin = Izin::where('approve_1', 0)
+                        ->whereHas('user', function ($query) use ($user) {
+                            $query->where('divisi', $user->divisi)
+                                ->whereHas('roles', function ($q) {
+                                    $q->where('name', 'KEPALA UNIT'); // Hanya dari Kepala Unit
+                                });
+                        })
+                        ->count();
+
+                    // Hitung Lembur dari Kepala Unit yang belum di-approve
+                    $pendingLembur = Lembur::where('approve_1', 0)
+                        ->whereHas('user', function ($query) use ($user) {
+                            $query->where('divisi', $user->divisi)
+                                ->whereHas('roles', function ($q) {
+                                    $q->where('name', 'KEPALA UNIT'); // Hanya dari Kepala Unit
+                                });
+                        })
+                        ->count();
+
+                    // Hitung Cuti dari Kepala Unit yang belum di-approve
+                    $pendingCuti = Cuti::where('approve_1', 0)
+                        ->whereHas('user', function ($query) use ($user) {
+                            $query->where('divisi', $user->divisi)
+                                ->whereHas('roles', function ($q) {
+                                    $q->where('name', 'KEPALA UNIT'); // Hanya dari Kepala Unit
+                                });
+                        })
+                        ->count();
+
+                    // Hitung Datang Terlambat dari Kepala Unit yang belum di-approve
+                    $pendingdt = DatangTerlambat::where('app_1', 0)
+                        ->whereHas('karyn', function ($query) use ($user) {
+                            $query->where('divisi', $user->divisi)
+                                ->whereHas('roles', function ($q) {
+                                    $q->where('name', 'KEPALA UNIT'); // Hanya dari Kepala Unit
+                                });
+                        })
+                        ->count();
+                }
+                // Jika user adalah Direktur, hitung data pending dari Kepala Bagian
+                elseif ($user->hasRole('DIREKTUR')) {
+                    // Hitung Izin dari Kepala Bagian yang belum di-approve
+                    $pendingIzin = Izin::where('approve_1', 0)
+                        ->whereHas('user', function ($query) {
+                            $query->whereHas('roles', function ($q) {
+                                $q->where('name', 'KEPALA BAGIAN'); // Hanya dari Kepala Bagian
+                            });
+                        })
+                        ->count();
+
+                    // Hitung Lembur dari Kepala Bagian yang belum di-approve
+                    $pendingLembur = Lembur::where('approve_1', 0)
+                        ->whereHas('user', function ($query) {
+                            $query->whereHas('roles', function ($q) {
+                                $q->where('name', 'KEPALA BAGIAN'); // Hanya dari Kepala Bagian
+                            });
+                        })
+                        ->count();
+
+                    // Hitung Cuti dari Kepala Bagian yang belum di-approve
+                    $pendingCuti = Cuti::where('approve_1', 0)
+                        ->whereHas('user', function ($query) {
+                            $query->whereHas('roles', function ($q) {
+                                $q->where('name', 'KEPALA BAGIAN'); // Hanya dari Kepala Bagian
+                            });
+                        })
+                        ->count();
+
+                    // Hitung Datang Terlambat dari Kepala Bagian yang belum di-approve
+                    $pendingdt = DatangTerlambat::where('app_1', 0)
+                        ->whereHas('karyn', function ($query) {
+                            $query->whereHas('roles', function ($q) {
+                                $q->where('name', 'KEPALA BAGIAN'); // Hanya dari Kepala Bagian
+                            });
+                        })
+                        ->count();
+                }
+
                 $pendingIzinsdi = Izin::where('approve_1', 1)
                     ->where('approve_2', 0)
                     ->count();

@@ -31,7 +31,7 @@
                                 <!-- Tab Daftar Datang Terlambat -->
                                 <div class="tab-pane fade show active" id="daftarDatangTerlambat" role="tabpanel"
                                     aria-labelledby="daftar-datang-terlambat-tab">
-                                    @if ($datangTerlambatKaryawan->isEmpty())
+                                    @if ($datangTerlambatPending->isEmpty())
                                         <p class="text-center mt-3">Tidak ada pengajuan datang terlambat untuk
                                             di-approve pada level ini.</p>
                                     @else
@@ -47,7 +47,7 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @foreach ($datangTerlambatKaryawan as $index => $datangTerlambat)
+                                                    @foreach ($datangTerlambatPending as $index => $datangTerlambat)
                                                         <tr>
                                                             <td>{{ $index + 1 }}</td>
                                                             <td>{{ $datangTerlambat->karyn->name }}</td>

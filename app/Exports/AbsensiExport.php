@@ -6,6 +6,7 @@ use App\Models\Absensi;
 use App\Models\User;
 use App\Models\Cuti;
 use App\Models\Izin;
+use App\Models\KalenderKerja;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -60,31 +61,41 @@ class AbsensiExport implements FromCollection, WithHeadings, WithMapping, WithCu
             while ($currentDate->lte($endDate)) {
                 $tanggal = $currentDate->format('Y-m-d');
 
-                // Cek absensi pada tanggal tersebut
-                $absen = Absensi::where('karyawan', $karyawan->id)
-                    ->whereDate('tanggal', $tanggal) // Pastikan format tanggal benar
+                // Cek kalender kerja untuk tanggal ini
+                $kalenderKerja = KalenderKerja::where('tanggal', $tanggal)
+                    ->where('karyawan', $karyawan->id) // Sesuaikan filter jika ada
                     ->first();
 
-                if ($absen) {
-                    $row['tanggal_' . $currentDate->day] = $absen->shift; // Menampilkan shift jika hadir
+                if ($kalenderKerja && $kalenderKerja->shift == 'OFF') {
+                    // Jika di kalender kerja shift-nya Off, tampilkan Off
+                    $row['tanggal_' . $currentDate->day] = 'OFF';
                 } else {
-                    // Cek cuti atau izin
-                    $cuti = Cuti::where('user_id', $karyawan->id)
-                        ->whereDate('tanggal_mulai', '<=', $tanggal)
-                        ->whereDate('tanggal_selesai', '>=', $tanggal)
+                    // Cek absensi pada tanggal tersebut
+                    $absen = Absensi::where('karyawan', $karyawan->id)
+                        ->whereDate('tanggal', $tanggal) // Pastikan format tanggal benar
                         ->first();
 
-                    $izin = Izin::where('user_id', $karyawan->id)
-                        ->whereDate('tanggal_mulai', '<=', $tanggal)
-                        ->whereDate('tanggal_selesai', '>=', $tanggal)
-                        ->first();
-
-                    if ($cuti) {
-                        $row['tanggal_' . $currentDate->day] = 'Cuti';
-                    } elseif ($izin) {
-                        $row['tanggal_' . $currentDate->day] = 'Izin';
+                    if ($absen) {
+                        $row['tanggal_' . $currentDate->day] = $absen->shift; // Menampilkan shift jika hadir
                     } else {
-                        $row['tanggal_' . $currentDate->day] = 'Alpa'; // Tidak ada kehadiran, cuti, atau izin
+                        // Cek cuti atau izin
+                        $cuti = Cuti::where('user_id', $karyawan->id)
+                            ->whereDate('tanggal_mulai', '<=', $tanggal)
+                            ->whereDate('tanggal_selesai', '>=', $tanggal)
+                            ->first();
+
+                        $izin = Izin::where('user_id', $karyawan->id)
+                            ->whereDate('tanggal_mulai', '<=', $tanggal)
+                            ->whereDate('tanggal_selesai', '>=', $tanggal)
+                            ->first();
+
+                        if ($cuti) {
+                            $row['tanggal_' . $currentDate->day] = 'Cuti';
+                        } elseif ($izin) {
+                            $row['tanggal_' . $currentDate->day] = 'Izin';
+                        } else {
+                            $row['tanggal_' . $currentDate->day] = 'Alpa'; // Tidak ada kehadiran, cuti, atau izin
+                        }
                     }
                 }
 

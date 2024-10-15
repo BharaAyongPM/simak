@@ -7,6 +7,7 @@ use App\Models\Absensi;
 use App\Models\Bag;
 use App\Models\Cuti;
 use App\Models\Izin;
+use App\Models\KalenderKerja;
 use App\Models\Unit;
 use App\Models\User;
 use Carbon\Carbon;
@@ -170,35 +171,45 @@ class AdminController extends Controller
             // Loop melalui setiap tanggal dalam periode yang dipilih
             $currentDate = Carbon::parse($tanggalAwal);
             while ($currentDate->lte(Carbon::parse($tanggalAkhir))) {
-                // Cek absensi berdasarkan tanggal dan karyawan
-                $absen = Absensi::where('karyawan', $user->id)
-                    ->where('tanggal', $currentDate->toDateString())
+                // Cek apakah di kalender kerja tanggal ini adalah "Off"
+                $kalenderKerja = KalenderKerja::where('tanggal', $currentDate->toDateString())
+                    ->where('karyawan', $user->id) // Atau sesuai filter kalender kerja
                     ->first();
 
-                // Jika absen tidak ditemukan, cek apakah karyawan cuti atau izin
-                if (!$absen) {
-                    // Cek apakah karyawan cuti pada tanggal ini
-                    $cuti = Cuti::where('user_id', $user->id)
-                        ->whereDate('tanggal_mulai', '<=', $currentDate)
-                        ->whereDate('tanggal_selesai', '>=', $currentDate)
-                        ->first();
-
-                    // Cek apakah karyawan izin pada tanggal ini
-                    $izin = Izin::where('user_id', $user->id)
-                        ->whereDate('tanggal_mulai', '<=', $currentDate)
-                        ->whereDate('tanggal_selesai', '>=', $currentDate)
-                        ->first();
-
-                    if ($cuti) {
-                        $row['tanggal_' . $currentDate->format('d')] = 'Cuti';
-                    } elseif ($izin) {
-                        $row['tanggal_' . $currentDate->format('d')] = 'Izin';
-                    } else {
-                        $row['tanggal_' . $currentDate->format('d')] = 'Alpa';
-                    }
+                if ($kalenderKerja && $kalenderKerja->shift == 'OFF') {
+                    // Jika di kalender kerja shift-nya Off, tampilkan Off
+                    $row['tanggal_' . $currentDate->format('d')] = 'OFF';
                 } else {
-                    // Jika absen ditemukan, tampilkan shift
-                    $row['tanggal_' . $currentDate->format('d')] = $absen->shift;
+                    // Cek absensi berdasarkan tanggal dan karyawan
+                    $absen = Absensi::where('karyawan', $user->id)
+                        ->where('tanggal', $currentDate->toDateString())
+                        ->first();
+
+                    // Jika absen tidak ditemukan, cek apakah karyawan cuti atau izin
+                    if (!$absen) {
+                        // Cek apakah karyawan cuti pada tanggal ini
+                        $cuti = Cuti::where('user_id', $user->id)
+                            ->whereDate('tanggal_mulai', '<=', $currentDate)
+                            ->whereDate('tanggal_selesai', '>=', $currentDate)
+                            ->first();
+
+                        // Cek apakah karyawan izin pada tanggal ini
+                        $izin = Izin::where('user_id', $user->id)
+                            ->whereDate('tanggal_mulai', '<=', $currentDate)
+                            ->whereDate('tanggal_selesai', '>=', $currentDate)
+                            ->first();
+
+                        if ($cuti) {
+                            $row['tanggal_' . $currentDate->format('d')] = 'Cuti';
+                        } elseif ($izin) {
+                            $row['tanggal_' . $currentDate->format('d')] = 'Izin';
+                        } else {
+                            $row['tanggal_' . $currentDate->format('d')] = 'Alpa';
+                        }
+                    } else {
+                        // Jika absen ditemukan, tampilkan shift
+                        $row['tanggal_' . $currentDate->format('d')] = $absen->shift;
+                    }
                 }
 
                 $currentDate->addDay(); // Tambahkan satu hari
@@ -224,10 +235,6 @@ class AdminController extends Controller
         // Return view dengan data yang dibutuhkan
         return view('admin.absensi.rekap', compact('bagians', 'units', 'tanggalAwal', 'tanggalAkhir'));
     }
-
-
-
-
 
 
     public function getUnitsByBagian($bagianId)

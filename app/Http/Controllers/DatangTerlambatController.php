@@ -47,6 +47,7 @@ class DatangTerlambatController extends Controller
         $datangTerlambat = DatangTerlambat::findOrFail($id); // Mendapatkan data datang terlambat berdasarkan ID
         return response()->json($datangTerlambat); // Mengirimkan data sebagai JSON untuk ditampilkan di modal
     }
+    // Menyimpan data datang terlambat baru dari modal form
 
     // Update Datang Terlambat
     public function update(Request $request, $id)

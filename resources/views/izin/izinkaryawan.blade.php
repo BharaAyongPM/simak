@@ -91,7 +91,8 @@
                                 <div class="tab-pane fade" id="approved" role="tabpanel"
                                     aria-labelledby="approved-tab">
                                     @if ($izinApprovedOrRejected->isEmpty())
-                                        <p class="text-center">Tidak ada histori izin yang di-approve atau ditolak.</p>
+                                        <p class="text-center">Tidak ada histori izin yang di-approve atau ditolak oleh
+                                            Anda.</p>
                                     @else
                                         <div class="table-responsive p-4">
                                             <table class="table align-items-center table-hover table-bordered mb-0">
@@ -104,34 +105,42 @@
                                                         <th>Tanggal Mulai</th>
                                                         <th>Tanggal Selesai</th>
                                                         <th>Keterangan</th>
-                                                        <th>Status Approve 1</th>
+                                                        <th>Status Approve</th>
                                                         <th>Keterangan Approve/Reject</th>
                                                         <th>Disetujui/Ditolak Oleh</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     @foreach ($izinApprovedOrRejected as $index => $izin)
-                                                        <tr>
-                                                            <td>{{ $index + 1 }}</td>
-                                                            <td>{{ $izin->user->name }}</td>
-                                                            <td>{{ \Carbon\Carbon::parse($izin->created_at)->format('d-M-Y') }}
-                                                            </td>
-                                                            <td>{{ $izin->jenis }}</td>
-                                                            <td>{{ \Carbon\Carbon::parse($izin->tanggal_mulai)->format('d-M-Y') }}
-                                                            </td>
-                                                            <td>{{ \Carbon\Carbon::parse($izin->tanggal_selesai)->format('d-M-Y') }}
-                                                            </td>
-                                                            <td>{{ $izin->keterangan }}</td>
-                                                            <td>
-                                                                @if ($izin->approve_1 == 1)
-                                                                    <span class="badge bg-success">Approved</span>
-                                                                @elseif ($izin->approve_1 == -1)
-                                                                    <span class="badge bg-danger">Rejected</span>
-                                                                @endif
-                                                            </td>
-                                                            <td>{{ $izin->keterangan1 }}</td>
-                                                            <td>{{ $izin->approvedBy1->name ?? 'N/A' }}</td>
-                                                        </tr>
+                                                        @if (Auth::user()->id == $izin->approved_by_1 || Auth::user()->id == $izin->approved_by_2)
+                                                            <tr>
+                                                                <td>{{ $index + 1 }}</td>
+                                                                <td>{{ $izin->user->name }}</td>
+                                                                <td>{{ \Carbon\Carbon::parse($izin->created_at)->format('d-M-Y') }}
+                                                                </td>
+                                                                <td>{{ $izin->jenis }}</td>
+                                                                <td>{{ \Carbon\Carbon::parse($izin->tanggal_mulai)->format('d-M-Y') }}
+                                                                </td>
+                                                                <td>{{ \Carbon\Carbon::parse($izin->tanggal_selesai)->format('d-M-Y') }}
+                                                                </td>
+                                                                <td>{{ $izin->keterangan }}</td>
+                                                                <td>
+                                                                    @if ($izin->approve_1 == 1 || $izin->approve_2 == 1)
+                                                                        <span class="badge bg-success">Approved</span>
+                                                                    @elseif ($izin->approve_1 == -1 || $izin->approve_2 == -1)
+                                                                        <span class="badge bg-danger">Rejected</span>
+                                                                    @endif
+                                                                </td>
+                                                                <td>
+                                                                    @if ($izin->approved_by_1 == Auth::user()->id)
+                                                                        {{ $izin->keterangan1 }}
+                                                                    @elseif ($izin->approved_by_2 == Auth::user()->id)
+                                                                        {{ $izin->keterangan2 }}
+                                                                    @endif
+                                                                </td>
+                                                                <td>{{ Auth::user()->name }}</td>
+                                                            </tr>
+                                                        @endif
                                                     @endforeach
                                                 </tbody>
                                             </table>
