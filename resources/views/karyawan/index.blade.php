@@ -190,6 +190,16 @@
                                         </select>
                                     </div>
                                 </div>
+                                <!-- Jenis Kelamin -->
+                                <div class="col-md-6">
+                                    <div class="card p-3 shadow-sm">
+                                        <label for="absensi" class="form-label">Jenis Absensi</label>
+                                        <select name="absensi" class="form-control select2" required>
+                                            <option value="WFO">WFO</option>
+                                            <option value="WFA">WFA</option>
+                                        </select>
+                                    </div>
+                                </div>
 
                                 <!-- Agama -->
                                 <div class="col-md-6">
@@ -371,7 +381,16 @@
                                         </select>
                                     </div>
                                 </div>
-
+                                <!-- Jenis ABSEN -->
+                                <div class="col-md-6">
+                                    <div class="card p-3 shadow-sm">
+                                        <label for="edit-absensi" class="form-label">Jenis Absen</label>
+                                        <select name="absensi" class="form-control" id="edit-absensi" required>
+                                            <option value="WFO">WFO</option>
+                                            <option value="WFA">WFA</option>
+                                        </select>
+                                    </div>
+                                </div>
                                 <!-- Agama -->
                                 <div class="col-md-6">
                                     <div class="card p-3 shadow-sm">

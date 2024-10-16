@@ -45,8 +45,8 @@ class AbsensiController extends Controller
     public function absenMasuk(Request $request)
     {
         $validatedData = $request->validate([
-            'lat' => 'required|numeric',
-            'lng' => 'required|numeric',
+            'lat' => 'required_if:absensi,WFO|numeric', // Validasi lat hanya jika absensi WFO
+            'lng' => 'required_if:absensi,WFO|numeric', // Validasi lng hanya jika absensi WFO
             'foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'lokasi' => 'required|string',
         ]);
@@ -73,27 +73,32 @@ class AbsensiController extends Controller
             return response()->json(['message' => 'Shift tidak ditemukan untuk hari ini.'], 400);
         }
 
-        // Ambil lokasi kantor dari tabel settings
-        $setting = Setting::first();
+        // Ambil informasi absensi (WFA atau WFO) dari tabel users
+        $user = Auth::user();
 
-        if (!$setting || !$setting->lat || !$setting->lon) {
-            return response()->json(['message' => 'Lokasi kantor tidak ditemukan atau belum diatur.'], 400);
-        }
+        if ($user->absensi === 'WFO') {
+            // Ambil lokasi kantor dari tabel settings
+            $setting = Setting::first();
 
-        // Kalkulasi jarak lokasi user dan kantor
-        $kantorLat = $setting->lat;
-        $kantorLng = $setting->lon;
-        $distance = $this->haversineGreatCircleDistance($request->lat, $request->lng, $kantorLat, $kantorLng);
+            if (!$setting || !$setting->lat || !$setting->lon) {
+                return response()->json(['message' => 'Lokasi kantor tidak ditemukan atau belum diatur.'], 400);
+            }
 
-        if ($distance > 100) {
-            return response()->json(['message' => 'Anda berada di luar jangkauan untuk absen.'], 400);
+            // Kalkulasi jarak lokasi user dan kantor
+            $kantorLat = $setting->lat;
+            $kantorLng = $setting->lon;
+            $distance = $this->haversineGreatCircleDistance($request->lat, $request->lng, $kantorLat, $kantorLng);
+
+            if ($distance > 100) {
+                return response()->json(['message' => 'Anda berada di luar jangkauan untuk absen.'], 400);
+            }
         }
 
         // Buat entri absensi baru
         $absensi = new Absensi();
         $absensi->tanggal = $today;
-        $absensi->lat = $request->lat;
-        $absensi->lng = $request->lng;
+        $absensi->lat = $user->absensi === 'WFO' ? $request->lat : null;
+        $absensi->lng = $user->absensi === 'WFO' ? $request->lng : null;
         $absensi->karyawan = Auth::id();
         $absensi->jenis = 'Masuk';
         $absensi->jam = $currentTime;
@@ -133,6 +138,7 @@ class AbsensiController extends Controller
             'absenId' => $absensi->id,  // Kembalikan ID absen untuk digunakan saat absen pulang
         ]);
     }
+
     private function haversineGreatCircleDistance($lat1, $lon1, $lat2, $lon2, $earthRadius = 6371000)
     {
         $latFrom = deg2rad($lat1);

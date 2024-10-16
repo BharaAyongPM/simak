@@ -43,6 +43,13 @@
                                             <p>Jam Kerja: {{ $lokasi->jam_masuk ?? 'N/A' }} -
                                                 {{ $lokasi->jam_pulang ?? 'N/A' }}</p>
 
+                                            @if (Auth::user()->absensi == 'WFO')
+                                                <!-- Jika WFO -->
+                                                <p>Mode Absensi: Work from Office (WFO)</p>
+                                            @else
+                                                <!-- Jika WFA -->
+                                                <p>Mode Absensi: Work from Anywhere (WFA)</p>
+                                            @endif
                                             <div class="d-flex justify-content-between">
                                                 <button class="btn btn-success" onclick="showModal('Masuk')">
                                                     {{-- @if ($latestAbsensi && $latestAbsensi->jenis == 'Masuk') disabled @endif> --}}
@@ -218,35 +225,39 @@
             });
 
             function submitAbsen() {
-                let kantorLat = {{ $setting->lat }}; // Latitude kantor dari database
-                let kantorLon = {{ $setting->lon }}; // Longitude kantor dari database
-                let lat = parseFloat(document.getElementById('latitude').value);
-                let lon = parseFloat(document.getElementById('longitude').value);
+                let absensiMode = '{{ Auth::user()->absensi }}'; // Mengambil mode absensi user (WFO/WFA)
 
-                // Haversine formula to calculate distance between two coordinates in meters
-                function haversine(lat1, lon1, lat2, lon2) {
-                    let R = 6371000; // Earth's radius in meters
-                    let dLat = (lat2 - lat1) * Math.PI / 180;
-                    let dLon = (lon2 - lon1) * Math.PI / 180;
-                    let a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-                    let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                    let distance = R * c;
-                    return distance; // distance in meters
+                if (absensiMode === 'WFO') {
+                    let kantorLat = {{ $setting->lat }}; // Latitude kantor dari database
+                    let kantorLon = {{ $setting->lon }}; // Longitude kantor dari database
+                    let lat = parseFloat(document.getElementById('latitude').value);
+                    let lon = parseFloat(document.getElementById('longitude').value);
+
+                    // Haversine formula to calculate distance between two coordinates in meters
+                    function haversine(lat1, lon1, lat2, lon2) {
+                        let R = 6371000; // Earth's radius in meters
+                        let dLat = (lat2 - lat1) * Math.PI / 180;
+                        let dLon = (lon2 - lon1) * Math.PI / 180;
+                        let a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                        let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                        let distance = R * c;
+                        return distance; // distance in meters
+                    }
+
+                    // Calculate the distance
+                    let distance = haversine(kantorLat, kantorLon, lat, lon);
+
+                    // Jika jarak lebih dari 100 meter, munculkan modal peringatan
+                    if (distance > 100) {
+                        var lokasiModal = new bootstrap.Modal(document.getElementById('lokasiModal'), {});
+                        lokasiModal.show();
+                        return; // Stop form submission
+                    }
                 }
 
-                // Calculate the distance
-                let distance = haversine(kantorLat, kantorLon, lat, lon);
-
-                // Jika jarak lebih dari 100 meter, munculkan modal peringatan
-                if (distance > 100) {
-                    var lokasiModal = new bootstrap.Modal(document.getElementById('lokasiModal'), {});
-                    lokasiModal.show();
-                    return; // Stop form submission
-                }
-
-                // Mengambil data dari canvas
+                // Jika WFA atau WFO dan jarak diperbolehkan, lanjutkan dengan submit absensi
                 let canvas = document.getElementById('canvas');
                 let imageData = canvas.toDataURL('image/png'); // Mendapatkan gambar dalam format base64
 
@@ -256,7 +267,7 @@
                     type: 'image/png'
                 }); // Membuat file gambar dari Blob
 
-                // Proceed with absen submission if the location is within range
+                // Proceed with absen submission
                 let absenType = document.getElementById('absenModalLabel').innerText.includes('Masuk') ? 'masuk' : 'pulang';
                 let formData = new FormData();
                 formData.append('lat', document.getElementById('latitude').value);
@@ -303,6 +314,7 @@
                     });
                 }
             }
+
 
             // Fungsi untuk konversi base64 ke Blob
             function dataURItoBlob(dataURI) {

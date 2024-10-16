@@ -68,7 +68,7 @@ class LemburController extends Controller
             $lembur->deposit_jam = $durasiLembur;
         } else {
             // Jika lembur bayar, hitung total bayar (misalnya gaji lembur per jam = 50000)
-            $lembur->rupiah_per_jam = 50000;  // Bisa dinamis, misalnya ambil dari user
+            $lembur->rupiah_per_jam = 0;  // Bisa dinamis, misalnya ambil dari user
             $lembur->total_bayar = $lembur->rupiah_per_jam * $durasiLembur;
         }
 
