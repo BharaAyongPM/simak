@@ -314,7 +314,7 @@
                                     <div class="card p-3 shadow-sm">
                                         <label for="edit-password" class="form-label">Password</label>
                                         <input type="password" name="password" class="form-control"
-                                            id="edit-password" required>
+                                            id="edit-password">
                                     </div>
                                 </div>
 
@@ -586,7 +586,7 @@
                         var bagian = button.data('bagian');
                         var unit = button.data('unit');
                         var email = button.data('email');
-                        var password = button.data('password');
+
                         // Isi form di modal dengan data yang diambil
                         var modal = $(this);
                         modal.find('#edit-id').val(id);
@@ -604,7 +604,7 @@
                         modal.find('#edit-bagian').val(bagian);
                         modal.find('#edit-unit').val(unit);
                         modal.find('#edit-email').val(email);
-                        modal.find('#edit-password').val(password);
+                        modal.find('#edit-password').val(''); // Kosongkan password
 
                         // Sesuaikan action URL pada form dengan ID karyawan
                         modal.find('form').attr('action', '/karyawan/' + id);

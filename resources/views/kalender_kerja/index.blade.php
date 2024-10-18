@@ -13,7 +13,11 @@
                                 <small>Divisi: {{ Auth::user()->bag->nama_bagian ?? 'Tidak ada data' }} | Unit:
                                     {{ Auth::user()->unt->unit ?? 'Tidak ada data' }}</small>
                             </div>
-
+                            <div>
+                                <!-- Tombol Tambah Jadwal -->
+                                <button class="btn btn-success" data-bs-toggle="modal"
+                                    data-bs-target="#tambahJadwalModal">Tambah Jadwal</button>
+                            </div>
                             <form method="GET" action="{{ route('kalender_kerja.index') }}" class="d-flex">
                                 <div class="input-group">
                                     <input type="date" name="tanggal_awal" class="form-control"
@@ -55,8 +59,9 @@
                                                             $kalender = $kalenderKaryawan
                                                                 ? $kalenderKaryawan->where('tanggal', $tanggal)->first()
                                                                 : null;
-                                                            $isEditable = \Carbon\Carbon::now()->lt(
-                                                                \Carbon\Carbon::parse($tanggal)->subDay(),
+                                                            // Tanggal bisa diedit jika hari ini atau masa depan
+                                                            $isEditable = \Carbon\Carbon::parse($tanggal)->gte(
+                                                                \Carbon\Carbon::today(),
                                                             );
                                                         @endphp
                                                         <td>
@@ -92,6 +97,7 @@
                             @endif
                         </div>
 
+
                         <div class="card-footer">
                             <form action="{{ route('kalender_kerja.uploadkplunit') }}" method="POST"
                                 enctype="multipart/form-data">
@@ -111,6 +117,57 @@
                 </div>
             </div>
         </div>
+        <!-- Modal Tambah Jadwal -->
+        <div class="modal fade" id="tambahJadwalModal" tabindex="-1" role="dialog"
+            aria-labelledby="tambahJadwalModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="tambahJadwalModalLabel">Tambah Jadwal Baru</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="tambahJadwalForm">
+                            @csrf
+
+                            <!-- Pilih Karyawan -->
+                            <div class="form-group">
+                                <label for="karyawan">Pilih Karyawan</label>
+                                <select name="karyawan_id" id="karyawan" class="form-control" required>
+                                    @foreach ($karyawanDivisi as $karyawan)
+                                        <option value="{{ $karyawan->id }}">{{ $karyawan->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Pilih Tanggal -->
+                            <div class="form-group mt-3">
+                                <label for="tanggal">Pilih Tanggal</label>
+                                <input type="date" name="tanggal" id="tanggal" class="form-control" required>
+                            </div>
+
+                            <!-- Pilih Shift -->
+                            <div class="form-group mt-3">
+                                <label for="shift">Pilih Shift</label>
+                                <select name="shift_id" id="shift" class="form-control" required>
+                                    @foreach ($shifts as $shift)
+                                        <option value="{{ $shift->id }}">{{ $shift->nama }} ({{ $shift->masuk }}
+                                            - {{ $shift->pulang }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Tutup</button>
+                                <button type="submit" class="btn btn-primary" id="saveJadwalBtn">Simpan
+                                    Jadwal</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Modal for Editing Shift -->
         <div class="modal fade" id="shiftModal" tabindex="-1" role="dialog" aria-labelledby="shiftModalLabel"
@@ -119,22 +176,24 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="shiftModalLabel">Edit Shift</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <form id="editShiftForm">
                             <input type="hidden" id="kalender_id">
+                            <!-- Dropdown untuk Pilihan Shift -->
                             <div class="form-group">
                                 <label for="shift">Pilih Shift</label>
-                                <select class="form-control" id="shift" name="shift">
-                                    <!-- Load dynamic shifts from controller -->
+                                <select class="form-control" id="shift" name="shift" required>
+                                    <!-- Tambahkan "required" -->
                                     @foreach ($shifts as $shift)
-                                        <option value="{{ $shift->nama }}">{{ $shift->nama }}
-                                            ({{ $shift->masuk }} - {{ $shift->pulang }})
-                                        </option>
+                                        <option value="{{ $shift->nama }}">{{ $shift->nama }} ({{ $shift->masuk }}
+                                            - {{ $shift->pulang }})</option>
                                     @endforeach
                                 </select>
                             </div>
+
                         </form>
                     </div>
                     <div class="modal-footer">
@@ -154,9 +213,9 @@
                 var shift = $(this).data('shift');
                 var tanggal = $(this).data('tanggal');
 
-                // Fill modal with data
+                // Set nilai di modal form
                 $('#kalender_id').val(kalenderId);
-                $('#shift').val(shift);
+                $('#shift').val(shift); // Isi dropdown shift dengan nilai yang ada
                 $('#shiftModal').modal('show');
             });
 
@@ -165,7 +224,13 @@
                 var kalenderId = $('#kalender_id').val();
                 var shift = $('#shift').val();
 
-                // Send AJAX request to update the shift
+                // Pastikan shift sudah dipilih
+                if (!shift || shift === '') {
+                    alert('Pilih shift terlebih dahulu.');
+                    return;
+                }
+
+                // Kirim request AJAX untuk memperbarui shift
                 $.ajax({
                     url: '/kalender_kerja/update-shift',
                     method: 'POST',
@@ -176,10 +241,54 @@
                     },
                     success: function(response) {
                         alert('Shift berhasil diubah!');
-                        location.reload(); // Reload page to update table
+                        location.reload(); // Reload halaman untuk memperbarui tabel
                     },
                     error: function(response) {
                         alert('Gagal mengubah shift.');
+                    }
+                });
+            });
+
+
+            $('#tambahJadwalForm').submit(function(e) {
+                e.preventDefault(); // Prevent form submission
+
+                var formData = {
+                    _token: '{{ csrf_token() }}',
+                    karyawan_id: $('#karyawan').val(),
+                    tanggal: $('#tanggal').val(),
+                    shift_id: $('#shift').val(),
+                };
+
+                // Kirim data melalui AJAX
+                $.ajax({
+                    url: '{{ route('kalender_kerja.store') }}',
+                    method: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        // Jika sukses, tampilkan pesan dan reload halaman
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Jadwal baru berhasil ditambahkan.',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+
+                        // Reload halaman setelah 2 detik
+                        setTimeout(function() {
+                            location.reload();
+                        }, 2000);
+                    },
+                    error: function(response) {
+                        // Jika ada error, tampilkan pesan error
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Gagal menambahkan jadwal.',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
                     }
                 });
             });

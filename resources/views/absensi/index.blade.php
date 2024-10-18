@@ -33,31 +33,26 @@
                                     <div class="row p-4">
                                         <div class="col-md-4 text-center">
                                             <img src="{{ asset('foto.jpg') }}" alt="Foto Karyawan"
-                                                class="img-fluid rounded-circle mb-3">
+                                                class="img-fluid rounded-circle mb-3 w-50">
                                         </div>
                                         <div class="col-md-8">
-                                            <h5>Nama: {{ Auth::user()->name }}</h5>
-                                            <p>Bagian: {{ $lokasi->bag->nama_bagian ?? 'Tidak diketahui' }}</p>
-                                            <p>Shift: {{ $lokasi->shift ?? 'Tidak diketahui' }}</p>
-
+                                            <h5>{{ Auth::user()->name }}</h5>
+                                            <p>Bagian: {{ $lokasi->bag->nama_bagian ?? 'Tidak diketahui' }} Shift:
+                                                {{ $lokasi->shift ?? 'Tidak diketahui' }}</p>
                                             <p>Jam Kerja: {{ $lokasi->jam_masuk ?? 'N/A' }} -
                                                 {{ $lokasi->jam_pulang ?? 'N/A' }}</p>
 
-                                            @if (Auth::user()->absensi == 'WFO')
-                                                <!-- Jika WFO -->
-                                                <p>Mode Absensi: Work from Office (WFO)</p>
-                                            @else
-                                                <!-- Jika WFA -->
-                                                <p>Mode Absensi: Work from Anywhere (WFA)</p>
+                                            <!-- Hanya tampilkan tombol absen jika shift bukan 'OFF' -->
+                                            @if ($lokasi->shift !== 'OFF')
+                                                <div class="d-flex justify-content-between d-md-none">
+                                                    <button class="btn btn-success" onclick="showModal('Masuk')"
+                                                        @if ($latestAbsensi && $latestAbsensi->jenis == 'Masuk') disabled @endif>
+                                                        Absen Masuk
+                                                    </button>
+                                                    <button class="btn btn-danger" onclick="showModal('Pulang')">Absen
+                                                        Pulang</button>
+                                                </div>
                                             @endif
-                                            <div class="d-flex justify-content-between">
-                                                <button class="btn btn-success" onclick="showModal('Masuk')">
-                                                    {{-- @if ($latestAbsensi && $latestAbsensi->jenis == 'Masuk') disabled @endif> --}}
-                                                    Absen Masuk
-                                                </button>
-                                                <button class="btn btn-danger" onclick="showModal('Pulang')">Absen
-                                                    Pulang</button>
-                                            </div>
 
                                             <p class="mt-3">Jam Absen Masuk: <span
                                                     id="jamMasuk">{{ $latestAbsensi->jam ?? 'Belum Absen' }}</span></p>
@@ -67,6 +62,7 @@
                                         </div>
                                     </div>
                                 </div>
+
 
                                 <!-- Tab Log Absensi -->
                                 <div class="tab-pane fade" id="log-absen" role="tabpanel"
@@ -125,7 +121,7 @@
                                 <div class="col-md-6">
                                     <h6>Foto</h6>
                                     <video id="video" width="100%" autoplay></video>
-                                    <button id="capture" class="btn btn-primary mt-2">Ambil Foto</button>
+                                    {{-- <button id="capture" class="btn btn-primary mt-2">Ambil Foto</button> --}}
                                     <canvas id="canvas" class="d-none"></canvas>
                                 </div>
                                 <div class="col-md-6">

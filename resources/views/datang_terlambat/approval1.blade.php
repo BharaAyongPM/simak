@@ -2,7 +2,12 @@
     <x-navbars.sidebar activePage="datadt"></x-navbars.sidebar>
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
         <x-navbars.navs.auth titlePage="Datang Terlambat Approval 1"></x-navbars.navs.auth>
-
+        <!-- Flash Message -->
+        @if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
         <div class="container-fluid py-4">
             <div class="row">
                 <div class="col-xl-12 mb-4">

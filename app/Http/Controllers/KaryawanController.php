@@ -145,11 +145,11 @@ class KaryawanController extends Controller
             'gaji' => 'required|numeric',
             'status_kar' => 'required|string',
             'unit' => 'required|string|max:100',
-            'password' => 'required|string|min:5', // jika password digunakan
+            'password' => 'nullable|string|min:5',  // jika password digunakan
         ]);
 
         // Update data karyawan
-        $user->update([
+        $updateData = [
             'name' => $request->name,
             'email' => $request->email,
             'nik' => $request->nik,
@@ -163,11 +163,17 @@ class KaryawanController extends Controller
             'tgl_lahir' => $request->tgl_lahir,
             'gaji' => $request->gaji,
             'status_kar' => $request->status_kar,
-            'password' => Hash::make($request->password),
             'unit' => $request->unit,
             'divisi' => $request->bagian,
-        ]);
+        ];
 
+        // Jika password diisi, maka tambahkan ke data update
+        if ($request->filled('password')) {
+            $updateData['password'] = Hash::make($request->password);
+        }
+
+        // Update data user
+        $user->update($updateData);
         return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil diupdate.');
     }
 

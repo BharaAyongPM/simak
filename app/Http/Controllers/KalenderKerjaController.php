@@ -220,24 +220,54 @@ class KalenderKerjaController extends Controller
         return redirect()->back()->with('success', 'Kalender kerja berhasil diunggah.');
     }
 
+    public function storeKalenderKerja(Request $request)
+    {
+        // Validasi input form
+        $request->validate([
+            'karyawan_id' => 'required|exists:users,id',
+            'tanggal' => 'required|date',
+            'shift_id' => 'required|exists:shift,id',
+        ]);
+
+        // Ambil data shift berdasarkan shift_id yang dipilih
+        $shift = Shift::findOrFail($request->input('shift_id'));
+
+        // Simpan kalender kerja baru
+        KalenderKerja::updateOrCreate(
+            [
+                'tanggal' => $request->input('tanggal'),
+                'karyawan' => $request->input('karyawan_id'),
+            ],
+            [
+                'shift' => $shift->nama,
+                'jam_masuk' => $shift->masuk,
+                'jam_pulang' => $shift->pulang,
+                'divisi' => auth()->user()->bag->id_bagian,
+                'unit' => auth()->user()->unt->id,
+            ]
+        );
+
+        return response()->json(['success' => 'Jadwal berhasil ditambahkan.']);
+    }
 
 
     public function updateShift(Request $request)
     {
         $validated = $request->validate([
             'kalender_id' => 'required|exists:kalenderkerja,id',
-            'shift' => 'required|string'
+            'shift' => 'required|string' // Field ini harus diisi
         ]);
 
         // Temukan entri kalender kerja
         $kalenderKerja = KalenderKerja::find($validated['kalender_id']);
 
-        // Update shift
+        // Temukan shift yang dipilih
         $shift = Shift::where('nama', $validated['shift'])->first();
         if (!$shift) {
             return response()->json(['message' => 'Shift tidak ditemukan'], 400);
         }
 
+        // Update shift dan jam kerja
         $kalenderKerja->shift = $shift->nama;
         $kalenderKerja->jam_masuk = $shift->masuk;
         $kalenderKerja->jam_pulang = $shift->pulang;
@@ -245,6 +275,7 @@ class KalenderKerjaController extends Controller
 
         return response()->json(['message' => 'Shift berhasil diubah']);
     }
+
     public function indexKaryawan(Request $request)
     {
         // Mendapatkan user yang sedang login

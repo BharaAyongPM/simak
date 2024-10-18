@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -22,29 +23,51 @@ class ProfileController extends Controller
     // Mengupdate profil termasuk nama, email, dan foto
     public function update(Request $request)
     {
-        $user = auth()->user(); // Mendapatkan user yang sedang login
-
-        // Validasi input
-        $attributes = $request->validate([
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'name' => 'required|max:255',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048' // Validasi foto
+        // Validasi input yang bisa di-update
+        $request->validate([
+            'email' => 'required|email|unique:users,email,' . auth()->id(),
+            'no_telp' => 'required|string|max:20',
+            'agama' => 'required|string|max:50',
+            'kelamin' => 'required|in:Pria,Wanita',
+            'alamat' => 'required|string|max:255',
         ]);
 
-        // Jika ada file foto yang diunggah, simpan file dan update 'foto' di database
-        if ($request->hasFile('foto')) {
-            // Menghapus foto lama jika ada
-            if ($user->foto) {
-                Storage::delete($user->foto);
-            }
+        // Update data user yang sedang login
+        $user = auth()->user();
+        $user->Update([
+            'email' => $request->email,
+            'no_telp' => $request->no_telp,
+            'agama' => $request->agama,
+            'kelamin' => $request->kelamin,
+            'alamat' => $request->alamat,
+        ]);
 
-            // Menyimpan foto baru
-            $attributes['foto'] = $request->file('foto')->store('profile_photos');
-        }
+        return redirect()->back()->with('success', 'Profil berhasil diperbarui');
+    }
+    public function updateFotoProfil(Request $request)
+    {
+        // Validasi input gambar
+        $request->validate([
+            'croppedImageData' => 'required|string', // base64 data dari gambar yang di-crop
+        ]);
 
-        // Update data user
-        $user->update($attributes);
+        // Mengambil user yang sedang login
+        $user = auth()->user();
 
-        return back()->withStatus('Profile successfully updated.');
+        // Decode base64 image
+        $image = $request->input('croppedImageData');
+        $image = str_replace('data:image/png;base64,', '', $image);
+        $image = str_replace(' ', '+', $image);
+        $imageName = 'foto_' . time() . '.png';
+
+        // Simpan gambar ke dalam direktori storage/foto
+        Storage::disk('public')->put('foto/' . $imageName, base64_decode($image));
+
+        // Update foto profil user
+        $user->update([
+            'foto' => $imageName,
+        ]);
+
+        return redirect()->back()->with('success', 'Foto profil berhasil diperbarui');
     }
 }

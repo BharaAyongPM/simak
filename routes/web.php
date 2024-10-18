@@ -57,6 +57,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/historydepo', [DashboardController::class, 'historydepo'])->name('history-deposit');
     Route::get('/rekappelatihan', [DashboardController::class, 'rekappelatihan'])->name('rekap-pelatihan');
     Route::get('/profile', [ProfileController::class, 'profil'])->name('user-profile');
+    Route::put('/profil/update', [ProfileController::class, 'update'])->name('profil.update');
+    Route::post('/profil/update-foto', [ProfileController::class, 'updateFotoProfil'])->name('profil.update.foto');
+
+
 
     //ABSENSi
     Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi');
@@ -71,6 +75,8 @@ Route::middleware('auth')->group(function () {
     //Cutilembur
     //Kalender Kerja
     Route::get('/kalender-kerja-karyawan', [KalenderKerjaController::class, 'indexKaryawan'])->name('kalender-kerja.karyawan.index');
+    Route::post('/kalender_kerja/store', [KalenderKerjaController::class, 'storeKalenderKerja'])->name('kalender_kerja.store');
+
     //template kalender kerja
     Route::get('/kalender-kerja/download-template', [KalenderKerjaController::class, 'downloadTemplate'])->name('kalender_kerja.download_template');
     Route::get('/kalender-kerja/download-templatead', [KalenderKerjaController::class, 'downloadTemplateAdmin'])->name('kalender_kerja.download_template.admin');
